@@ -325,6 +325,18 @@ a:hover {
 	margin: 1.5rem 0;
 }
 
+.prose a {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.prose blockquote {
+	margin: 0 0 1.15rem;
+	padding: 0 0 0 1rem;
+	border-left: 1px solid var(--rule);
+	color: var(--muted);
+}
+
 .prose pre {
 	margin: 1.5rem 0;
 	padding: 1rem 1.1rem;
@@ -472,9 +484,15 @@ html[data-theme='dark'] .prose pre.astro-code span {
 	font-size: 0.8125rem;
 }
 
-.admin-form label {
+.admin-form label,
+.admin-field {
 	display: grid;
 	gap: 0.4rem;
+}
+
+.admin-field {
+	color: var(--muted);
+	font-size: 0.8125rem;
 }
 
 .admin-form input[type='text'],
@@ -515,6 +533,55 @@ html[data-theme='dark'] .prose pre.astro-code span {
 
 .admin-form button[type='submit']:hover {
 	color: var(--text);
+}
+
+.md-editor {
+	display: grid;
+	gap: 0.55rem;
+}
+
+.md-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.65rem 0.9rem;
+}
+
+.md-toolbar button {
+	appearance: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--muted);
+	font: inherit;
+	font-size: 0.8125rem;
+	cursor: pointer;
+}
+
+.md-toolbar button:hover,
+.md-toolbar button:focus-visible {
+	color: var(--text);
+}
+
+.md-toolbar [data-md-preview-toggle] {
+	margin-left: auto;
+}
+
+.md-editor.is-over .md-body {
+	border-color: var(--text);
+}
+
+.md-preview {
+	min-height: 16rem;
+	padding: 0.9rem;
+	border: 1px solid var(--rule);
+	color: var(--text);
+	font-size: 1.0625rem;
+}
+
+.md-preview.prose {
+	margin-top: 0;
 }
 
 .mark-picker {

@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import MarkdownEditor from '../../../components/MarkdownEditor.astro';
 import { listJournalsFromRepo } from '../../../lib/github';
 
 let journals: { id: string; title: string }[] = [];
@@ -52,10 +53,10 @@ const errorText =
 					<span>date</span>
 					<input type="date" name="pubDate" value={today} required />
 				</label>
-				<label>
+				<div class="admin-field">
 					<span>body</span>
-					<textarea name="body" rows="16" required></textarea>
-				</label>
+					<MarkdownEditor />
+				</div>
 				<div class="dropzone" data-dropzone>
 					<p>drop images here</p>
 					<input type="file" name="images" accept="image/jpeg,image/png,image/webp,image/gif" multiple />
@@ -68,75 +69,3 @@ const errorText =
 		)
 	}
 </AdminLayout>
-
-<script>
-	const zone = document.querySelector('[data-dropzone]');
-	const input = zone?.querySelector('input[type="file"]');
-	const list = document.querySelector('[data-drop-list]');
-	const body = document.querySelector<HTMLTextAreaElement>('textarea[name="body"]');
-	const title = document.querySelector<HTMLInputElement>('input[name="title"]');
-
-	if (zone instanceof HTMLElement && input instanceof HTMLInputElement) {
-		let skipChange = false;
-
-		function slugCandidate() {
-			return (
-				title?.value
-					.toLowerCase()
-					.replace(/[^a-z0-9]+/g, '-')
-					.replace(/^-+|-+$/g, '')
-					.slice(0, 40) || 'post'
-			);
-		}
-
-		function insertMarkdown(files: File[]) {
-			if (!body) return;
-			const slug = slugCandidate();
-			const snippets = files
-				.filter((file) => file.type.startsWith('image/'))
-				.map((file) => `![${file.name}](/uploads/${slug}/${file.name})`);
-			if (snippets.length === 0) return;
-			body.value = `${body.value.trim()}\n\n${snippets.join('\n')}\n`.trimStart();
-		}
-
-		function render() {
-			if (!list) return;
-			list.replaceChildren();
-			for (const file of input.files ?? []) {
-				const item = document.createElement('li');
-				item.textContent = file.name;
-				list.append(item);
-			}
-		}
-
-		function addFiles(files: FileList | File[]) {
-			const incoming = [...files].filter((file) => file.type.startsWith('image/'));
-			const current = new DataTransfer();
-			for (const file of input.files ?? []) current.items.add(file);
-			for (const file of incoming) current.items.add(file);
-			skipChange = true;
-			input.files = current.files;
-			skipChange = false;
-			insertMarkdown(incoming);
-			render();
-		}
-
-		zone.addEventListener('click', () => input.click());
-		zone.addEventListener('dragover', (event) => {
-			event.preventDefault();
-			zone.classList.add('is-over');
-		});
-		zone.addEventListener('dragleave', () => zone.classList.remove('is-over'));
-		zone.addEventListener('drop', (event) => {
-			event.preventDefault();
-			zone.classList.remove('is-over');
-			if (event.dataTransfer?.files.length) addFiles(event.dataTransfer.files);
-		});
-		input.addEventListener('click', (event) => event.stopPropagation());
-		input.addEventListener('change', () => {
-			if (skipChange) return;
-			insertMarkdown([...(input.files ?? [])]);
-			render();
-		});
-	}
-</script>

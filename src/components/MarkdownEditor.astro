@@ -1,0 +1,272 @@
+<div class="md-editor" data-md-editor>
+	<div class="md-toolbar" role="toolbar" aria-label="formatting">
+		<button type="button" data-md="bold">bold</button>
+		<button type="button" data-md="italic">italic</button>
+		<button type="button" data-md="heading">heading</button>
+		<button type="button" data-md="list">list</button>
+		<button type="button" data-md="quote">quote</button>
+		<button type="button" data-md="code">code</button>
+		<button type="button" data-md="link">link</button>
+		<button type="button" data-md="image">image</button>
+		<button type="button" data-md="diagram">diagram</button>
+		<button type="button" data-md="preview" data-md-preview-toggle>preview</button>
+	</div>
+	<textarea class="md-body" name="body" rows="16" required data-md-body></textarea>
+	<div class="md-preview prose" hidden data-md-preview></div>
+</div>
+
+<script>
+	import { marked } from 'marked';
+
+	const editor = document.querySelector('[data-md-editor]');
+	const textarea = editor?.querySelector<HTMLTextAreaElement>('[data-md-body]');
+	const preview = editor?.querySelector<HTMLElement>('[data-md-preview]');
+	const previewToggle = editor?.querySelector<HTMLButtonElement>('[data-md-preview-toggle]');
+	const form = editor?.closest('form');
+	const title = form?.querySelector<HTMLInputElement>('input[name="title"]');
+	const zone = form?.querySelector<HTMLElement>('[data-dropzone]');
+	const input = form?.querySelector<HTMLInputElement>('input[name="images"]');
+	const list = form?.querySelector('[data-drop-list]');
+
+	if (editor instanceof HTMLElement && textarea && preview && previewToggle) {
+		const surface = editor;
+		const field = textarea;
+		const pane = preview;
+		const toggle = previewToggle;
+		const bag = new DataTransfer();
+		const blobs = new Map<string, string>();
+		let skipChange = false;
+		let showingPreview = false;
+		let pendingCaret: { start: number; end: number } | null = null;
+
+		marked.setOptions({ gfm: true, breaks: false });
+
+		function slugCandidate() {
+			return (
+				title?.value
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-+|-+$/g, '')
+					.slice(0, 40) || 'post'
+			);
+		}
+
+		function syncPreview() {
+			if (!showingPreview) return;
+			const html = marked.parse(field.value, { async: false }) as string;
+			pane.innerHTML = html;
+			for (const img of pane.querySelectorAll('img')) {
+				const src = img.getAttribute('src') ?? '';
+				const fileName = src.split('/').pop() ?? '';
+				const blob = blobs.get(src) || blobs.get(fileName);
+				if (blob) img.setAttribute('src', blob);
+			}
+		}
+
+		function setPreview(on: boolean) {
+			showingPreview = on;
+			field.hidden = on;
+			pane.hidden = !on;
+			surface.classList.toggle('is-preview', on);
+			toggle.textContent = on ? 'write' : 'preview';
+			if (on) syncPreview();
+			else field.focus();
+		}
+
+		function apply(next: string, selectStart: number, selectEnd: number) {
+			field.value = next;
+			field.setSelectionRange(selectStart, selectEnd);
+			field.focus();
+			syncPreview();
+		}
+
+		function wrapInline(before: string, after: string, placeholder: string) {
+			const start = field.selectionStart;
+			const end = field.selectionEnd;
+			const inner = field.value.slice(start, end) || placeholder;
+			const next = `${field.value.slice(0, start)}${before}${inner}${after}${field.value.slice(end)}`;
+			const innerStart = start + before.length;
+			apply(next, innerStart, innerStart + inner.length);
+		}
+
+		function prefixLines(prefix: string) {
+			const start = field.selectionStart;
+			const end = field.selectionEnd;
+			const value = field.value;
+			const from = value.lastIndexOf('\n', start - 1) + 1;
+			let to = value.indexOf('\n', end);
+			if (end > start && value[end - 1] === '\n') to = end - 1;
+			else if (to === -1) to = value.length;
+
+			const block = value.slice(from, to);
+			const nextBlock = block
+				.split('\n')
+				.map((line) => (line.startsWith(prefix) ? line : `${prefix}${line}`))
+				.join('\n');
+
+			field.setRangeText(nextBlock, from, to, 'end');
+			field.focus();
+			syncPreview();
+		}
+
+		function insertAtCursor(text: string, selectOffset = text.length, selectLength = 0) {
+			if (pendingCaret) {
+				field.setSelectionRange(pendingCaret.end, pendingCaret.end);
+				pendingCaret = null;
+			} else {
+				field.setSelectionRange(field.selectionEnd, field.selectionEnd);
+			}
+			const start = field.selectionStart;
+			const before = field.value.slice(0, start);
+			const pad = before && !before.endsWith('\n') ? '\n' : '';
+			const chunk = `${pad}${text}`;
+			field.setRangeText(chunk, start, start, 'end');
+			if (selectLength > 0) {
+				const inner = start + pad.length + selectOffset;
+				field.setSelectionRange(inner, inner + selectLength);
+			}
+			field.focus();
+			syncPreview();
+		}
+
+		function insertLink() {
+			const url = window.prompt('url');
+			if (!url) {
+				field.focus();
+				return;
+			}
+			const start = field.selectionStart;
+			const end = field.selectionEnd;
+			const selected = field.value.slice(start, end);
+			const inner = selected || 'text';
+			const snippet = `[${inner}](${url})`;
+			const next = `${field.value.slice(0, start)}${snippet}${field.value.slice(end)}`;
+			const innerStart = start + 1;
+			apply(next, innerStart, innerStart + inner.length);
+		}
+
+		function insertDiagram() {
+			const fence = '```mermaid\nflowchart LR\n  \n```';
+			insertAtCursor(fence, '```mermaid\nflowchart LR\n  '.length, 0);
+		}
+
+		function insertCode() {
+			const selected = field.value.slice(field.selectionStart, field.selectionEnd);
+			if (selected.includes('\n')) wrapInline('```\n', '\n```', 'code');
+			else wrapInline('`', '`', 'code');
+		}
+
+		function run(action: string) {
+			if (action === 'preview') {
+				setPreview(!showingPreview);
+				return;
+			}
+			if (showingPreview) setPreview(false);
+			if (action === 'bold') wrapInline('**', '**', 'bold');
+			else if (action === 'italic') wrapInline('*', '*', 'italic');
+			else if (action === 'heading') prefixLines('## ');
+			else if (action === 'list') prefixLines('- ');
+			else if (action === 'quote') prefixLines('> ');
+			else if (action === 'code') insertCode();
+			else if (action === 'link') insertLink();
+			else if (action === 'image') {
+				pendingCaret = { start: field.selectionStart, end: field.selectionEnd };
+				input?.click();
+			}
+			else if (action === 'diagram') insertDiagram();
+		}
+
+		function renderList() {
+			if (!list) return;
+			list.replaceChildren();
+			for (const file of bag.files) {
+				const item = document.createElement('li');
+				item.textContent = file.name;
+				list.append(item);
+			}
+		}
+
+		function insertImages(files: File[]) {
+			const slug = slugCandidate();
+			const snippets = files
+				.filter((file) => file.type.startsWith('image/'))
+				.map((file) => `![${file.name}](/uploads/${slug}/${file.name})`);
+			if (snippets.length === 0) return;
+			insertAtCursor(snippets.join('\n'));
+		}
+
+		function addFiles(files: FileList | File[]) {
+			if (!input) return;
+			const incoming = [...files].filter((file) => file.type.startsWith('image/'));
+			if (incoming.length === 0) return;
+
+			for (const file of incoming) {
+				bag.items.add(file);
+				const url = URL.createObjectURL(file);
+				blobs.set(file.name, url);
+				blobs.set(`/uploads/${slugCandidate()}/${file.name}`, url);
+			}
+
+			skipChange = true;
+			input.files = bag.files;
+			skipChange = false;
+			insertImages(incoming);
+			renderList();
+		}
+
+		surface.querySelector('.md-toolbar')?.addEventListener('click', (event) => {
+			const button = (event.target as HTMLElement).closest('button[data-md]');
+			if (!(button instanceof HTMLButtonElement)) return;
+			run(button.dataset.md ?? '');
+		});
+
+		field.addEventListener('keydown', (event) => {
+			if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+			const key = event.key.toLowerCase();
+			if (key === 'b') {
+				event.preventDefault();
+				run('bold');
+			} else if (key === 'i') {
+				event.preventDefault();
+				run('italic');
+			} else if (key === 'k') {
+				event.preventDefault();
+				run('link');
+			}
+		});
+
+		field.addEventListener('input', syncPreview);
+		field.addEventListener('dragover', (event) => {
+			if (event.dataTransfer?.types.includes('Files')) {
+				event.preventDefault();
+				surface.classList.add('is-over');
+			}
+		});
+		field.addEventListener('dragleave', () => surface.classList.remove('is-over'));
+		field.addEventListener('drop', (event) => {
+			surface.classList.remove('is-over');
+			if (!event.dataTransfer?.files.length) return;
+			event.preventDefault();
+			addFiles(event.dataTransfer.files);
+		});
+
+		if (zone && input) {
+			zone.addEventListener('click', () => input.click());
+			zone.addEventListener('dragover', (event) => {
+				event.preventDefault();
+				zone.classList.add('is-over');
+			});
+			zone.addEventListener('dragleave', () => zone.classList.remove('is-over'));
+			zone.addEventListener('drop', (event) => {
+				event.preventDefault();
+				zone.classList.remove('is-over');
+				if (event.dataTransfer?.files.length) addFiles(event.dataTransfer.files);
+			});
+			input.addEventListener('click', (event) => event.stopPropagation());
+			input.addEventListener('change', () => {
+				if (skipChange) return;
+				addFiles(input.files ?? []);
+			});
+		}
+	}
+</script>
