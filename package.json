@@ -1,5 +1,5 @@
 {
-  "name": "pandji-blog",
+  "name": "pandji-writes",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -12,7 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.2.6"
+    "astro": "^7.2.6",
+    "mermaid": "^11.17.2"
   },
   "allowScripts": {
     "esbuild": true

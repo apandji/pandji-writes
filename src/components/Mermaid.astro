@@ -1,0 +1,55 @@
+<script>
+		import mermaid from 'mermaid';
+
+		function theme() {
+			return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'neutral';
+		}
+
+		function blocks() {
+			return [...document.querySelectorAll<HTMLElement>('pre > code.language-mermaid')].map(
+				(code) => {
+					const pre = code.parentElement as HTMLElement;
+					if (!pre.dataset.source) {
+						pre.dataset.source = code.textContent ?? '';
+					}
+					return pre;
+				},
+			);
+		}
+
+		async function renderMermaid() {
+			const nodes = blocks();
+			if (nodes.length === 0) return;
+
+			mermaid.initialize({
+				startOnLoad: false,
+				theme: theme(),
+				securityLevel: 'strict',
+				fontFamily: 'inherit',
+			});
+
+			for (const [index, pre] of nodes.entries()) {
+				const source = pre.dataset.source ?? '';
+				const id = `diagram-${index}`;
+				try {
+					const { svg } = await mermaid.render(id, source);
+					let output = pre.nextElementSibling as HTMLElement | null;
+					if (!output?.classList.contains('mermaid-diagram')) {
+						output = document.createElement('div');
+						output.className = 'mermaid-diagram';
+						pre.after(output);
+					}
+					output.innerHTML = svg;
+					pre.hidden = true;
+				} catch (error) {
+					pre.hidden = false;
+					console.error(error);
+				}
+			}
+		}
+
+		renderMermaid();
+		document.documentElement.addEventListener('themechange', () => {
+			renderMermaid();
+		});
+	</script>

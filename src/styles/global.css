@@ -1,0 +1,401 @@
+:root {
+	--bg: #f2f1ef;
+	--text: #3d3c38;
+	--muted: #8a8984;
+	--rule: #e3e2de;
+	--code-bg: #eae9e5;
+	color-scheme: light;
+}
+
+html[data-theme='dark'] {
+	--bg: #161615;
+	--text: #d8d6d0;
+	--muted: #8e8d87;
+	--rule: #2c2c29;
+	--code-bg: #1f1f1c;
+	color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--bg);
+	color: var(--text);
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+	font-size: 1.0625rem;
+	font-weight: 400;
+	font-synthesis: none;
+	line-height: 1.8;
+	letter-spacing: 0.015em;
+	background: var(--bg);
+	color: var(--text);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.28em;
+}
+
+:focus-visible {
+	outline: 1px solid var(--text);
+	outline-offset: 3px;
+}
+
+.wrap,
+.shell {
+	width: min(40rem, calc(100% - 3rem));
+	margin-inline: auto;
+}
+
+.shell {
+	width: min(64rem, calc(100% - 3rem));
+}
+
+.site-header,
+.site-footer {
+	padding-block: 2.5rem;
+}
+
+.site-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1.5rem;
+}
+
+.site-title {
+	font-size: 0.9375rem;
+	font-weight: 400;
+	letter-spacing: 0.04em;
+}
+
+.site-footer {
+	color: var(--muted);
+	font-size: 0.875rem;
+}
+
+.theme-toggle {
+	appearance: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--muted);
+	font: inherit;
+	font-size: 0.8125rem;
+	cursor: pointer;
+}
+
+.theme-toggle:hover {
+	color: var(--text);
+}
+
+.page {
+	padding-bottom: 5rem;
+}
+
+.page--journal {
+	display: grid;
+	grid-template-columns: 13.5rem minmax(0, 40rem);
+	gap: 4rem;
+	align-items: start;
+}
+
+.home-journals {
+	list-style: none;
+	margin: 2.5rem 0 0;
+	padding: 0;
+}
+
+.home-journals li + li {
+	margin-top: 2.25rem;
+}
+
+.home-journal {
+	display: flex;
+	align-items: baseline;
+	gap: 0.7rem;
+}
+
+.home-journal:hover {
+	text-decoration: none;
+}
+
+.home-journal:hover .home-name {
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.28em;
+}
+
+.home-mark {
+	flex: none;
+	font-size: 1.05rem;
+	line-height: 1.3;
+}
+
+.home-name {
+	font-size: 1.35rem;
+	font-weight: 300;
+	font-style: italic;
+	letter-spacing: 0.02em;
+	line-height: 1.45;
+	text-transform: lowercase;
+}
+
+.index {
+	position: sticky;
+	top: 2rem;
+	padding-bottom: 3rem;
+}
+
+.index-heading {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+	margin: 0 0 1.6rem;
+}
+
+.index-mark {
+	flex: none;
+	font-size: 0.9rem;
+	line-height: 1.35;
+}
+
+.index-journal {
+	font-size: 0.8125rem;
+	line-height: 1.35;
+	text-transform: lowercase;
+	color: var(--muted);
+}
+
+.index-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.index-list li + li {
+	margin-top: 0.7rem;
+}
+
+.index-list a {
+	display: block;
+	color: var(--muted);
+	font-size: 0.8125rem;
+	line-height: 1.4;
+}
+
+.index-list a.is-active,
+.index-list a:hover {
+	color: var(--text);
+	font-weight: 400;
+	text-decoration: none;
+}
+
+.feed {
+	min-width: 0;
+	padding-bottom: 4rem;
+}
+
+.entry {
+	scroll-margin-top: 2rem;
+}
+
+.entry + .entry {
+	margin-top: 5.5rem;
+	padding-top: 5.5rem;
+	border-top: 1px solid var(--rule);
+}
+
+.post-kicker {
+	margin: 0 0 0.35rem;
+	color: var(--muted);
+	font-size: 0.8125rem;
+	text-transform: lowercase;
+}
+
+.journal-title,
+.page-title,
+.post-title {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 300;
+	font-style: italic;
+	letter-spacing: 0.02em;
+	line-height: 1.4;
+}
+
+.journal-desc,
+.post-date {
+	margin: 0.65rem 0 0;
+	color: var(--muted);
+	font-size: 0.9375rem;
+}
+
+.post-list {
+	list-style: none;
+	margin: 1.75rem 0 0;
+	padding: 0;
+}
+
+.post-list li + li {
+	margin-top: 0.9rem;
+}
+
+.post-row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1.5rem;
+}
+
+.post-row time {
+	flex: none;
+	color: var(--muted);
+	font-size: 0.875rem;
+}
+
+.empty {
+	margin: 1.75rem 0 0;
+	color: var(--muted);
+}
+
+.prose {
+	margin-top: 2.75rem;
+}
+
+.prose > :first-child {
+	margin-top: 0;
+}
+
+.prose h2,
+.prose h3 {
+	margin: 2.6rem 0 0.8rem;
+	font-size: 1.05rem;
+	font-weight: 300;
+	font-style: italic;
+	letter-spacing: 0.02em;
+	line-height: 1.45;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+	margin: 0 0 1.15rem;
+}
+
+.prose li + li {
+	margin-top: 0.3rem;
+}
+
+.prose hr {
+	margin: 2.4rem 0;
+	border: 0;
+	border-top: 1px solid var(--rule);
+}
+
+.prose img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 1.5rem 0;
+}
+
+.prose pre {
+	margin: 1.5rem 0;
+	padding: 1rem 1.1rem;
+	overflow-x: auto;
+	background: var(--code-bg);
+	font-size: 0.875rem;
+	line-height: 1.55;
+}
+
+.prose :not(pre) > code {
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: 0.875em;
+}
+
+.prose pre,
+.prose code {
+	font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.prose pre.astro-code {
+	background-color: var(--code-bg) !important;
+}
+
+html:not([data-theme='dark']) .prose pre.astro-code,
+html:not([data-theme='dark']) .prose pre.astro-code span {
+	color: var(--shiki-light) !important;
+}
+
+html[data-theme='dark'] .prose pre.astro-code,
+html[data-theme='dark'] .prose pre.astro-code span {
+	color: var(--shiki-dark) !important;
+}
+
+.mermaid-diagram {
+	margin: 1.75rem 0;
+	overflow-x: auto;
+}
+
+.mermaid-diagram svg {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+.mermaid-diagram .nodeLabel,
+.mermaid-diagram text {
+	font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif !important;
+}
+
+@media (max-width: 900px) {
+	.page--journal {
+		grid-template-columns: 1fr;
+		gap: 2.5rem;
+	}
+
+	.index {
+		position: static;
+		padding-bottom: 0;
+	}
+
+	.index-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem 1.1rem;
+	}
+
+	.index-list li + li {
+		margin-top: 0;
+	}
+}
+
+@media (max-width: 640px) {
+	.wrap,
+	.shell {
+		width: min(40rem, calc(100% - 2rem));
+	}
+
+	.post-row {
+		flex-direction: column;
+		gap: 0.15rem;
+	}
+}

@@ -1,0 +1,75 @@
+---
+import { Font } from 'astro:assets';
+import { site } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	frame?: 'home' | 'journal';
+}
+
+const { title, description = site.description, frame = 'home' } = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : site.name;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
+		<title>{pageTitle}</title>
+		<Font cssVariable="--font-sans" preload />
+		<Font cssVariable="--font-mono" />
+		<script is:inline>
+			(() => {
+				const stored = localStorage.getItem('theme');
+				const theme =
+					stored === 'light' || stored === 'dark'
+						? stored
+						: window.matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light';
+				document.documentElement.dataset.theme = theme;
+			})();
+		</script>
+	</head>
+	<body>
+		<div class:list={[frame === 'journal' ? 'shell' : 'wrap']}>
+			<header class="site-header">
+				<a class="site-title" href="/">{site.name}</a>
+				<button class="theme-toggle" type="button" data-theme-toggle>
+					dark
+				</button>
+			</header>
+			<main class:list={['page', frame === 'journal' && 'page--journal']}>
+				<slot />
+			</main>
+			{frame === 'home' && <footer class="site-footer">{site.author}</footer>}
+		</div>
+		<script>
+			const button = document.querySelector('[data-theme-toggle]');
+			const root = document.documentElement;
+
+			function label() {
+				if (!button) return;
+				button.textContent = root.dataset.theme === 'dark' ? 'light' : 'dark';
+			}
+
+			function setTheme(theme: string) {
+				root.dataset.theme = theme;
+				localStorage.setItem('theme', theme);
+				label();
+				root.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+			}
+
+			label();
+			button?.addEventListener('click', () => {
+				setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+			});
+		</script>
+	</body>
+</html>

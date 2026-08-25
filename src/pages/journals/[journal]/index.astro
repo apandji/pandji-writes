@@ -1,0 +1,57 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import JournalIndex from '../../../components/JournalIndex.astro';
+import Mermaid from '../../../components/Mermaid.astro';
+import { getJournals, getPostsByJournal } from '../../../lib/content';
+import { formatDate, journalMark } from '../../../lib/site';
+
+export async function getStaticPaths() {
+	const journals = await getJournals();
+	return journals.map((journal) => ({
+		params: { journal: journal.id },
+		props: { journal },
+	}));
+}
+
+const { journal } = Astro.props;
+const posts = await getPostsByJournal(journal.id);
+const entries = await Promise.all(
+	posts.map(async (post) => {
+		const { Content } = await render(post);
+		return { post, Content };
+	}),
+);
+const hasMermaid = posts.some((post) => /```mermaid/.test(post.body ?? ''));
+const mark = journalMark(journal.id, journal.data.emoji);
+---
+
+<Layout title={journal.data.title} description={journal.data.description} frame="journal">
+	<JournalIndex
+		mark={mark}
+		journalTitle={journal.data.title}
+		posts={posts.map((post) => ({ id: post.id, title: post.data.title }))}
+	/>
+	<div class="feed">
+		{
+			entries.length === 0 ? (
+				<p class="empty">No posts in this journal yet.</p>
+			) : (
+				entries.map(({ post, Content }) => (
+					<article class="entry" id={post.id}>
+						<h1 class="post-title">{post.data.title}</h1>
+						<p class="post-date">
+							<time datetime={post.data.pubDate.toISOString()}>
+								{formatDate(post.data.pubDate)}
+							</time>
+						</p>
+						<div class="prose">
+							<Content />
+						</div>
+					</article>
+				))
+			)
+		}
+		{hasMermaid && <Mermaid />}
+	</div>
+</Layout>

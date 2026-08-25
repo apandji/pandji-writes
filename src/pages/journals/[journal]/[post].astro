@@ -1,0 +1,38 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import Mermaid from '../../../components/Mermaid.astro';
+import { getJournalForPost, getPosts, journalHref } from '../../../lib/content';
+import { formatDate } from '../../../lib/site';
+
+export async function getStaticPaths() {
+	const posts = await getPosts();
+	return Promise.all(
+		posts.map(async (post) => {
+			const journal = await getJournalForPost(post);
+			return {
+				params: { journal: journal.id, post: post.id },
+				props: { post, journal },
+			};
+		}),
+	);
+}
+
+const { post, journal } = Astro.props;
+const { Content } = await render(post);
+const hasMermaid = /```mermaid/.test(post.body ?? '');
+---
+
+<Layout title={post.data.title} description={journal.data.description}>
+	<p class="post-kicker">
+		<a href={`${journalHref(journal.id)}#${post.id}`}>{journal.data.title}</a>
+	</p>
+	<h1 class="post-title">{post.data.title}</h1>
+	<p class="post-date">
+		<time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+	</p>
+	<article class="prose">
+		<Content />
+	</article>
+	{hasMermaid && <Mermaid />}
+</Layout>

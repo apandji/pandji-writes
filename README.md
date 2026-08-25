@@ -1,43 +1,52 @@
-# Astro Starter Kit: Minimal
+# pandji writes.
 
-```sh
-npm create astro@latest -- --template minimal
+A small static journal, built with [Astro](https://astro.build) and Markdown. The homepage lists journals. Opening a journal shows the latest article, then older ones as you scroll, with an index on the left.
+
+## Write
+
+**New journal** — add a Markdown file in `src/content/journals/`. The filename is the URL slug. A stable abstract mark is assigned from the slug; set `emoji` if you want a specific one.
+
+```md
+---
+title: Workshop notes
+description: Optional one-liner.
+order: 3
+---
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+**New post** — add a Markdown file in `src/content/posts/`. Point it at a journal slug.
 
-## 🚀 Project Structure
+```md
+---
+title: A post title
+pubDate: 2026-08-25
+journal: workshop-notes
+---
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+Write in Markdown. Use fenced code blocks for code.
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Diagrams and circuits
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Use a `mermaid` fence for flowcharts, sequences, and simple block diagrams:
 
-Any static assets, like images, can be placed in the `public/` directory.
+````md
+```mermaid
+flowchart LR
+  A --> B
+```
+````
 
-## 🧞 Commands
+Mermaid is enough for ideas. Breadboard photos, KiCad schematics, and Fritzing layouts should be images in `src/assets/` or `public/`.
 
-All commands are run from the root of the project, from a terminal:
+## Commands
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+| Command           | Action                 |
+| ----------------- | ---------------------- |
+| `npm run dev`     | Local server           |
+| `npm run build`   | Production build       |
+| `npm run preview` | Preview the built site |
 
-## 👀 Want to learn more?
+## Deploy
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Push the repo to GitHub and import it in [Vercel](https://vercel.com). Framework preset: Astro. Build command: `npm run build`. Output: `dist`.

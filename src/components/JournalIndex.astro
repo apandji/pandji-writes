@@ -1,0 +1,61 @@
+---
+interface Props {
+	mark: string;
+	journalTitle: string;
+	posts: { id: string; title: string }[];
+}
+
+const { mark, journalTitle, posts } = Astro.props;
+---
+
+<nav class="index" aria-label="Articles">
+	<p class="index-heading">
+		<span class="index-mark" aria-hidden="true">{mark}</span>
+		<span class="index-journal">{journalTitle}</span>
+	</p>
+	{
+		posts.length > 0 && (
+			<ol class="index-list">
+				{posts.map((post) => (
+					<li>
+						<a href={`#${post.id}`} data-index-link={post.id}>
+							{post.title}
+						</a>
+					</li>
+				))}
+			</ol>
+		)
+	}
+</nav>
+
+<script>
+	const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];
+	const articles = links
+		.map((link) => document.getElementById(link.dataset.indexLink ?? ''))
+		.filter((node): node is HTMLElement => node instanceof HTMLElement);
+
+	function setActive(id: string | undefined) {
+		for (const link of links) {
+			link.classList.toggle('is-active', link.dataset.indexLink === id);
+		}
+	}
+
+	if (articles.length > 0) {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const visible = entries
+					.filter((entry) => entry.isIntersecting)
+					.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+				if (visible?.target.id) setActive(visible.target.id);
+			},
+			{ rootMargin: '0px 0px -55% 0px', threshold: [0.1, 0.25, 0.5] },
+		);
+
+		for (const article of articles) observer.observe(article);
+		setActive(articles[0]?.id);
+
+		if (location.hash) {
+			setActive(location.hash.slice(1));
+		}
+	}
+</script>

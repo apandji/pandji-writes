@@ -1,17 +1,24 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import { getJournals, journalHref } from '../lib/content';
+import { journalMark } from '../lib/site';
 
+const journals = await getJournals();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+	<ul class="home-journals">
+		{
+			journals.map((journal) => (
+				<li>
+					<a class="home-journal" href={journalHref(journal.id)}>
+						<span class="home-mark" aria-hidden="true">
+							{journalMark(journal.id, journal.data.emoji)}
+						</span>
+						<span class="home-name">{journal.data.title}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</Layout>

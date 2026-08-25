@@ -1,0 +1,27 @@
+---
+interface Props {
+	posts: { href: string; title: string; date: Date }[];
+	empty?: string;
+}
+
+import { formatDate } from '../lib/site';
+
+const { posts, empty = 'No posts yet.' } = Astro.props;
+---
+
+{
+	posts.length === 0 ? (
+		<p class="empty">{empty}</p>
+	) : (
+		<ul class="post-list">
+			{posts.map((post) => (
+				<li>
+					<a class="post-row" href={post.href}>
+						<span>{post.title}</span>
+						<time datetime={post.date.toISOString()}>{formatDate(post.date)}</time>
+					</a>
+				</li>
+			))}
+		</ul>
+	)
+}
