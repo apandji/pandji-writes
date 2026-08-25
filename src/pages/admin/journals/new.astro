@@ -1,0 +1,35 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { journalMarks } from '../../../lib/site';
+
+const error = Astro.url.searchParams.get('error');
+---
+
+<AdminLayout title="new journal">
+	<form class="admin-form" method="post" action="/api/admin/journals">
+		<p class="admin-kicker">new journal</p>
+		<label>
+			<span>title</span>
+			<input type="text" name="title" required maxlength="80" />
+		</label>
+		<fieldset class="mark-picker">
+			<legend>symbol</legend>
+			<label class="mark-choice">
+				<input type="radio" name="emoji" value="" checked />
+				<span>random</span>
+			</label>
+			{
+				journalMarks.map((mark) => (
+					<label class="mark-choice">
+						<input type="radio" name="emoji" value={mark} />
+						<span>{mark}</span>
+					</label>
+				))
+			}
+		</fieldset>
+		<button type="submit">save</button>
+		{error && <p class="admin-error">{error === 'title' ? 'needs a title.' : error}</p>}
+	</form>
+</AdminLayout>

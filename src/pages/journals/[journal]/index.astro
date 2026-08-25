@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
 import JournalIndex from '../../../components/JournalIndex.astro';
 import Mermaid from '../../../components/Mermaid.astro';
+import EmptyPoem from '../../../components/EmptyPoem.astro';
 import { getJournals, getPostsByJournal } from '../../../lib/content';
 import { formatDate, journalMark } from '../../../lib/site';
 
@@ -35,7 +36,7 @@ const mark = journalMark(journal.id, journal.data.emoji);
 	<div class="feed">
 		{
 			entries.length === 0 ? (
-				<p class="empty">No posts in this journal yet.</p>
+				<EmptyPoem />
 			) : (
 				entries.map(({ post, Content }) => (
 					<article class="entry" id={post.id}>

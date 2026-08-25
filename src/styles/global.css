@@ -2,6 +2,7 @@
 	--bg: #f2f1ef;
 	--text: #3d3c38;
 	--muted: #8a8984;
+	--poem: #b4b2ab;
 	--rule: #e3e2de;
 	--code-bg: #eae9e5;
 	color-scheme: light;
@@ -11,6 +12,7 @@ html[data-theme='dark'] {
 	--bg: #161615;
 	--text: #d8d6d0;
 	--muted: #8e8d87;
+	--poem: #5a5955;
 	--rule: #2c2c29;
 	--code-bg: #1f1f1c;
 	color-scheme: dark;
@@ -271,9 +273,15 @@ a:hover {
 	font-size: 0.875rem;
 }
 
-.empty {
-	margin: 1.75rem 0 0;
-	color: var(--muted);
+.empty,
+.empty-poem {
+	margin: 0;
+	color: var(--poem);
+	font-weight: 300;
+	font-style: italic;
+	letter-spacing: 0.03em;
+	line-height: 1.75;
+	max-width: 22rem;
 }
 
 .prose {
@@ -398,4 +406,195 @@ html[data-theme='dark'] .prose pre.astro-code span {
 		flex-direction: column;
 		gap: 0.15rem;
 	}
+}
+
+.admin-nav {
+	display: flex;
+	align-items: baseline;
+	gap: 1rem;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.admin-nav a:hover,
+.admin-nav button:hover {
+	color: var(--text);
+}
+
+.admin-nav form {
+	display: inline;
+	margin: 0;
+}
+
+.admin-kicker {
+	margin: 0 0 1.2rem;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.admin-section {
+	margin-top: 0.5rem;
+}
+
+.admin-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.admin-list li {
+	display: flex;
+	align-items: baseline;
+	gap: 0.7rem;
+	text-transform: lowercase;
+}
+
+.admin-list li + li {
+	margin-top: 0.85rem;
+}
+
+.admin-actions {
+	display: flex;
+	gap: 1.25rem;
+	margin: 2rem 0 0;
+	color: var(--muted);
+	font-size: 0.875rem;
+}
+
+.admin-form {
+	display: grid;
+	gap: 1.35rem;
+}
+
+.admin-form label,
+.admin-form legend {
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.admin-form label {
+	display: grid;
+	gap: 0.4rem;
+}
+
+.admin-form input[type='text'],
+.admin-form input[type='password'],
+.admin-form input[type='date'],
+.admin-form select,
+.admin-form textarea {
+	width: 100%;
+	margin: 0;
+	padding: 0.4rem 0 0.55rem;
+	border: 0;
+	border-bottom: 1px solid var(--rule);
+	border-radius: 0;
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+}
+
+.admin-form textarea {
+	border: 1px solid var(--rule);
+	padding: 0.9rem;
+	min-height: 16rem;
+	line-height: 1.7;
+	resize: vertical;
+}
+
+.admin-form button[type='submit'] {
+	appearance: none;
+	justify-self: start;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--muted);
+	font: inherit;
+	cursor: pointer;
+}
+
+.admin-form button[type='submit']:hover {
+	color: var(--text);
+}
+
+.mark-picker {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.55rem 1rem;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.mark-picker legend {
+	padding: 0;
+	margin: 0 0 0.65rem;
+}
+
+.mark-choice {
+	display: flex !important;
+	grid-template-columns: none;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 0.35rem;
+	width: auto;
+	color: var(--text);
+	font-size: 1rem;
+	cursor: pointer;
+}
+
+.mark-choice input {
+	width: auto;
+	margin: 0;
+	accent-color: var(--text);
+}
+
+.dropzone {
+	position: relative;
+	padding: 1.4rem 1rem;
+	border: 1px dashed var(--rule);
+	color: var(--muted);
+	font-size: 0.875rem;
+	text-align: center;
+	cursor: pointer;
+}
+
+.dropzone.is-over {
+	border-color: var(--text);
+	color: var(--text);
+}
+
+.dropzone input[type='file'] {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	border: 0;
+}
+
+.drop-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.drop-list li + li {
+	margin-top: 0.25rem;
+}
+
+.admin-hint,
+.admin-error,
+.admin-note {
+	margin: 0;
+	color: var(--poem);
+	font-size: 0.875rem;
+	font-weight: 300;
+	font-style: italic;
+}
+
+.admin-error {
+	color: var(--muted);
 }

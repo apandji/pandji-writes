@@ -8,11 +8,15 @@ export async function getJournals() {
 }
 
 export async function getPosts() {
-	const posts = await getCollection('posts', ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	try {
+		const posts = await getCollection('posts', ({ data }) => {
+			return import.meta.env.PROD ? data.draft !== true : true;
+		});
 
-	return posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+		return posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+	} catch {
+		return [];
+	}
 }
 
 export async function getPostsByJournal(journalId: string) {

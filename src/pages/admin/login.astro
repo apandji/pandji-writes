@@ -1,0 +1,41 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { createSessionCookie, hasValidCredentials, isSignedIn } from '../../lib/auth';
+
+if (isSignedIn(Astro.cookies)) {
+	return Astro.redirect('/admin');
+}
+
+let error = '';
+
+if (Astro.request.method === 'POST') {
+	const data = await Astro.request.formData();
+	const username = String(data.get('username') ?? '');
+	const password = String(data.get('password') ?? '');
+
+	if (hasValidCredentials(username, password)) {
+		createSessionCookie(Astro.cookies);
+		return Astro.redirect('/admin');
+	}
+
+	error = 'that did not match.';
+}
+---
+
+<Layout title="admin" noindex>
+	<form class="admin-form" method="post">
+		<p class="admin-kicker">admin</p>
+		<label>
+			<span>username</span>
+			<input type="text" name="username" autocomplete="username" required />
+		</label>
+		<label>
+			<span>password</span>
+			<input type="password" name="password" autocomplete="current-password" required />
+		</label>
+		<button type="submit">enter</button>
+		{error && <p class="admin-error">{error}</p>}
+	</form>
+</Layout>

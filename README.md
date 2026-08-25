@@ -2,42 +2,32 @@
 
 A small static journal, built with [Astro](https://astro.build) and Markdown. The homepage lists journals. Opening a journal shows the latest article, then older ones as you scroll, with an index on the left.
 
-## Write
+## Write from the site
 
-**New journal** — add a Markdown file in `src/content/journals/`. The filename is the URL slug. A stable abstract mark is assigned from the slug; set `emoji` if you want a specific one.
+Go to `/admin`. Sign in with the username and password stored in environment variables. Saving a journal or post commits to GitHub; Vercel rebuilds the live site.
 
-```md
----
-title: Workshop notes
-description: Optional one-liner.
-order: 3
----
-```
+Images dropped into a post are stored in `public/uploads/`.
 
-**New post** — add a Markdown file in `src/content/posts/`. Point it at a journal slug.
+You can still write Markdown by hand in `src/content/` if you prefer.
 
-```md
----
-title: A post title
-pubDate: 2026-08-25
-journal: workshop-notes
----
+## Environment
 
-Write in Markdown. Use fenced code blocks for code.
-```
+Copy `.env.example` to `.env` locally, and set the same values in the Vercel project.
 
-## Diagrams and circuits
+| Variable | Purpose |
+| --- | --- |
+| `ADMIN_USERNAME` | Admin login |
+| `ADMIN_PASSWORD` | Admin password |
+| `SESSION_SECRET` | Long random string for the login cookie |
+| `GITHUB_TOKEN` | Personal access token with `repo` contents access |
+| `GITHUB_REPO` | `apandji/pandji-writes` |
+| `GITHUB_BRANCH` | `main` |
 
-Use a `mermaid` fence for flowcharts, sequences, and simple block diagrams:
+Create the GitHub token at [github.com/settings/tokens](https://github.com/settings/tokens) with permission to read and write repository contents.
 
-````md
-```mermaid
-flowchart LR
-  A --> B
-```
-````
+## Diagrams
 
-Mermaid is enough for ideas. Breadboard photos, KiCad schematics, and Fritzing layouts should be images in `src/assets/` or `public/`.
+Use a `mermaid` fence for flowcharts. Photos and schematics are ordinary images.
 
 ## Commands
 
@@ -46,7 +36,3 @@ Mermaid is enough for ideas. Breadboard photos, KiCad schematics, and Fritzing l
 | `npm run dev`     | Local server           |
 | `npm run build`   | Production build       |
 | `npm run preview` | Preview the built site |
-
-## Deploy
-
-Push the repo to GitHub and import it in [Vercel](https://vercel.com). Framework preset: Astro. Build command: `npm run build`. Output: `dist`.

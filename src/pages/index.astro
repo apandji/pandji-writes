@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import EmptyPoem from '../components/EmptyPoem.astro';
 import { getJournals, journalHref } from '../lib/content';
 import { journalMark } from '../lib/site';
 
@@ -7,18 +8,22 @@ const journals = await getJournals();
 ---
 
 <Layout>
-	<ul class="home-journals">
-		{
-			journals.map((journal) => (
-				<li>
-					<a class="home-journal" href={journalHref(journal.id)}>
-						<span class="home-mark" aria-hidden="true">
-							{journalMark(journal.id, journal.data.emoji)}
-						</span>
-						<span class="home-name">{journal.data.title}</span>
-					</a>
-				</li>
-			))
-		}
-	</ul>
+	{
+		journals.length === 0 ? (
+			<EmptyPoem />
+		) : (
+			<ul class="home-journals">
+				{journals.map((journal) => (
+					<li>
+						<a class="home-journal" href={journalHref(journal.id)}>
+							<span class="home-mark" aria-hidden="true">
+								{journalMark(journal.id, journal.data.emoji)}
+							</span>
+							<span class="home-name">{journal.data.title}</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		)
+	}
 </Layout>

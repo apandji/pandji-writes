@@ -1,0 +1,53 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { journalMark } from '../../lib/site';
+import { listJournalsFromRepo } from '../../lib/github';
+
+const saved = Astro.url.searchParams.get('saved');
+let journals: { id: string; title: string; emoji?: string }[] = [];
+let loadError = '';
+
+try {
+	journals = await listJournalsFromRepo();
+} catch (error) {
+	loadError = error instanceof Error ? error.message : 'could not read the repo.';
+}
+
+const note =
+	saved === 'journal'
+		? 'journal committed. the site will catch up in a minute.'
+		: saved === 'post'
+			? 'post committed. the site will catch up in a minute.'
+			: '';
+---
+
+<AdminLayout>
+	{note && <p class="admin-note">{note}</p>}
+	{loadError && <p class="admin-error">{loadError}</p>}
+
+	<section class="admin-section">
+		<p class="admin-kicker">journals</p>
+		{
+			journals.length === 0 && !loadError ? (
+				<p class="empty-poem">nothing here yet.</p>
+			) : (
+				<ul class="admin-list">
+					{journals.map((journal) => (
+						<li>
+							<span class="home-mark" aria-hidden="true">
+								{journalMark(journal.id, journal.emoji)}
+							</span>
+							<span>{journal.title}</span>
+						</li>
+					))}
+				</ul>
+			)
+		}
+		<p class="admin-actions">
+			<a href="/admin/journals/new">new journal</a>
+			<a href="/admin/posts/new">new post</a>
+		</p>
+	</section>
+</AdminLayout>

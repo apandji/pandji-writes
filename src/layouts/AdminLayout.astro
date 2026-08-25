@@ -5,13 +5,10 @@ import '../styles/global.css';
 
 interface Props {
 	title?: string;
-	description?: string;
-	frame?: 'home' | 'journal';
-	noindex?: boolean;
 }
 
-const { title, description = site.description, frame = 'home', noindex = false } = Astro.props;
-const pageTitle = title ? `${title} — ${site.name}` : site.name;
+const { title } = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : `admin — ${site.name}`;
 ---
 
 <!doctype html>
@@ -21,8 +18,7 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content={description} />
-		{noindex && <meta name="robots" content="noindex" />}
+		<meta name="robots" content="noindex" />
 		<title>{pageTitle}</title>
 		<Font cssVariable="--font-sans" preload />
 		<Font cssVariable="--font-mono" />
@@ -40,17 +36,22 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 		</script>
 	</head>
 	<body>
-		<div class:list={[frame === 'journal' ? 'shell' : 'wrap']}>
+		<div class="wrap">
 			<header class="site-header">
 				<a class="site-title" href="/">{site.name}</a>
-				<button class="theme-toggle" type="button" data-theme-toggle>
-					dark
-				</button>
+				<nav class="admin-nav">
+					<a href="/admin">admin</a>
+					<a href="/admin/journals/new">journal</a>
+					<a href="/admin/posts/new">write</a>
+					<form method="post" action="/api/admin/logout">
+						<button class="theme-toggle" type="submit">log out</button>
+					</form>
+					<button class="theme-toggle" type="button" data-theme-toggle>dark</button>
+				</nav>
 			</header>
-			<main class:list={['page', frame === 'journal' && 'page--journal']}>
+			<main class="page">
 				<slot />
 			</main>
-			{frame === 'home' && <footer class="site-footer">{site.author}</footer>}
 		</div>
 		<script>
 			const button = document.querySelector('[data-theme-toggle]');
@@ -65,7 +66,6 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 				root.dataset.theme = theme;
 				localStorage.setItem('theme', theme);
 				label();
-				root.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
 			}
 
 			label();
