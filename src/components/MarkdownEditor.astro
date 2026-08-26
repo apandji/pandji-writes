@@ -50,9 +50,17 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 		data-md-images
 	/>
 	<ul class="md-slash" hidden data-md-slash role="listbox" aria-label="insert block"></ul>
+	<div class="md-link-pop" hidden data-md-link>
+		<label>
+			<span class="visually-hidden">url</span>
+			<input type="url" placeholder="https://" data-md-link-url />
+		</label>
+		<button type="button" data-md-link-ok>add</button>
+		<button type="button" data-md-link-cancel>cancel</button>
+	</div>
 	<div class="md-status">
 		<span data-md-count>0 words</span>
-		<span class="md-status-hint">/ blocks · ⌘/Ctrl + Enter to publish · drafts auto-saved here</span>
+		<span class="md-status-hint">/ blocks · ⌘/Ctrl+Enter draft · ⌘/Ctrl+Shift+Enter publish · drafts auto-saved here</span>
 		<span data-md-draft-note hidden>draft restored</span>
 	</div>
 </div>
@@ -81,26 +89,44 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 	const countEl = editor?.querySelector<HTMLElement>('[data-md-count]');
 	const draftNote = editor?.querySelector<HTMLElement>('[data-md-draft-note]');
 	const slashMenu = editor?.querySelector<HTMLUListElement>('[data-md-slash]');
+	const linkPop = editor?.querySelector<HTMLElement>('[data-md-link]');
+	const linkUrl = editor?.querySelector<HTMLInputElement>('[data-md-link-url]');
+	const linkOk = editor?.querySelector<HTMLButtonElement>('[data-md-link-ok]');
+	const linkCancel = editor?.querySelector<HTMLButtonElement>('[data-md-link-cancel]');
 	const form = editor?.closest('form');
 	const title = form?.querySelector<HTMLInputElement>('input[name="title"]');
 	const journal = form?.querySelector<HTMLSelectElement>('select[name="journal"]');
 	const pubDate = form?.querySelector<HTMLInputElement>('input[name="pubDate"]');
-	const draftKey = editor instanceof HTMLElement ? editor.dataset.draftKey || 'post-draft' : 'post-draft';
+	const draftKey = editor instanceof HTMLElement ? editor.dataset.draftKey || 'post-draft:new' : 'post-draft:new';
 	const resume = form?.dataset.resume === '1';
 	const preferJournal = form?.dataset.preferJournal ?? '';
 
-	if (editor instanceof HTMLElement && textarea && preview && previewToggle && input && slashMenu) {
+	if (
+		editor instanceof HTMLElement &&
+		textarea &&
+		preview &&
+		previewToggle &&
+		input &&
+		slashMenu &&
+		linkPop &&
+		linkUrl &&
+		linkOk &&
+		linkCancel
+	) {
 		const surface = editor;
 		const field = textarea;
 		const pane = preview;
 		const toggle = previewToggle;
 		const fileInput = input;
 		const menu = slashMenu;
+		const linkPanel = linkPop;
+		const linkField = linkUrl;
 		const bag = new DataTransfer();
 		const blobs = new Map<string, string>();
 		let skipChange = false;
 		let showingPreview = false;
 		let pendingCaret: { start: number; end: number } | null = null;
+		let linkRange: { start: number; end: number } | null = null;
 		let draftTimer = 0;
 		let slashOpen = false;
 		let slashIndex = 0;
@@ -308,19 +334,42 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 		}
 
 		function insertLink() {
-			const url = window.prompt('url');
-			if (!url) {
-				field.focus();
+			linkRange = { start: field.selectionStart, end: field.selectionEnd };
+			linkField.value = '';
+			linkPanel.hidden = false;
+			linkField.focus();
+			linkField.select();
+		}
+
+		function closeLink() {
+			linkPanel.hidden = true;
+			linkRange = null;
+			field.focus();
+		}
+
+		function confirmLink() {
+			const url = linkField.value.trim();
+			if (!url || !linkRange) {
+				closeLink();
 				return;
 			}
-			const start = field.selectionStart;
-			const end = field.selectionEnd;
+			const { start, end } = linkRange;
 			const selected = field.value.slice(start, end);
 			const inner = selected || 'text';
 			const snippet = `[${inner}](${url})`;
 			const next = `${field.value.slice(0, start)}${snippet}${field.value.slice(end)}`;
+			linkPanel.hidden = true;
+			linkRange = null;
 			const innerStart = start + 1;
 			apply(next, innerStart, innerStart + inner.length);
+		}
+
+		function submitIntent(intentValue: 'draft' | 'publish') {
+			const intent = form?.querySelector<HTMLInputElement>('[data-intent]');
+			if (intent) intent.value = intentValue;
+			if (intentValue === 'publish') window.playPublishDing?.();
+			saveDraft();
+			form?.requestSubmit();
 		}
 
 		function insertDiagram() {
@@ -566,11 +615,14 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 					run('link');
 					return;
 				}
+				if (key === 's') {
+					event.preventDefault();
+					submitIntent('draft');
+					return;
+				}
 				if (key === 'enter') {
 					event.preventDefault();
-					const intent = form?.querySelector<HTMLInputElement>('[data-intent]');
-					if (intent) intent.value = 'publish';
-					form?.requestSubmit();
+					submitIntent(event.shiftKey ? 'publish' : 'draft');
 					return;
 				}
 			}
@@ -637,10 +689,26 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 			closeSlash();
 		});
 
+		linkOk.addEventListener('click', confirmLink);
+		linkCancel.addEventListener('click', closeLink);
+		linkField.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				confirmLink();
+			}
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				closeLink();
+			}
+		});
+
 		form?.addEventListener('click', (event) => {
 			const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-set-intent]');
 			const intent = form.querySelector<HTMLInputElement>('[data-intent]');
-			if (button && intent) intent.value = button.dataset.setIntent ?? 'publish';
+			if (button && intent) {
+				intent.value = button.dataset.setIntent ?? 'draft';
+				if (intent.value === 'publish') window.playPublishDing?.();
+			}
 		});
 
 		form?.addEventListener('submit', (event) => {
@@ -650,6 +718,7 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 			if (intent && submitter instanceof HTMLButtonElement && submitter.dataset.setIntent) {
 				intent.value = submitter.dataset.setIntent;
 			}
+			saveDraft();
 			for (const button of form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')) {
 				button.disabled = true;
 			}

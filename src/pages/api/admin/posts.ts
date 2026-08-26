@@ -117,11 +117,17 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
 		await commitFiles(files, message, bits.join('; '));
 
+		const clearKey = editing ? `post-draft:${slug}` : 'post-draft:new';
+
 		if (isDraft) {
-			return redirect(`/admin/drafts?saved=draft`);
+			return redirect(
+				`/admin/drafts?saved=draft&clear=${encodeURIComponent(clearKey)}`,
+			);
 		}
 
-		return redirect(`/admin/journals/${encodeURIComponent(journal)}?saved=post`);
+		return redirect(
+			`/admin/journals/${encodeURIComponent(journal)}?saved=post&slug=${encodeURIComponent(slug)}&clear=${encodeURIComponent(clearKey)}`,
+		);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'save failed';
 		return redirect(fail('', '', message));

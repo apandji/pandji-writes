@@ -3,7 +3,7 @@ import { render } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
 import JournalIndex from '../../../components/JournalIndex.astro';
 import Mermaid from '../../../components/Mermaid.astro';
-import EmptyPoem from '../../../components/EmptyPoem.astro';
+import EmptyNote from '../../../components/EmptyNote.astro';
 import { getJournals, getPostsByJournal } from '../../../lib/content';
 import { formatDate, journalMark } from '../../../lib/site';
 
@@ -36,7 +36,7 @@ const empty = entries.length === 0;
 >
 	{
 		empty ? (
-			<EmptyPoem />
+			<EmptyNote message="nothing written yet." />
 		) : (
 			<>
 				<JournalIndex posts={posts.map((post) => ({ id: post.id, title: post.data.title }))} />

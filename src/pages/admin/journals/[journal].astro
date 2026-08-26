@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PublishDing from '../../../components/PublishDing.astro';
 import { formatDate, journalMark } from '../../../lib/site';
 import { listJournalsForAdmin, listPostsForAdmin } from '../../../lib/github';
 import Button from '../../../components/Button.astro';
@@ -10,6 +11,8 @@ import MarkPicker from '../../../components/MarkPicker.astro';
 const { journal: journalId } = Astro.params;
 const saved = Astro.url.searchParams.get('saved');
 const error = Astro.url.searchParams.get('error');
+const publishedSlug = Astro.url.searchParams.get('slug') ?? '';
+const clearDraftKey = Astro.url.searchParams.get('clear') ?? '';
 
 const journals = await listJournalsForAdmin();
 const journal = journals.find((item) => item.id === journalId);
@@ -20,6 +23,7 @@ if (!journal) {
 
 const posts = (await listPostsForAdmin()).filter((post) => post.journal === journal.id);
 const mark = journalMark(journal.id, journal.emoji);
+const liveHref = publishedSlug ? `/journals/${journal.id}/${publishedSlug}` : `/journals/${journal.id}`;
 
 function parseDay(value: string) {
 	const date = new Date(`${value}T00:00:00Z`);
@@ -41,9 +45,16 @@ function parseDay(value: string) {
 	}
 	{
 		saved === 'post' && (
-			<p class="admin-note" data-clear-draft>
-				post published. the site will catch up in a minute.
-			</p>
+			<div class="publish-ritual" data-publish-ritual data-clear-draft={clearDraftKey || 'post-draft:new'}>
+				<p class="publish-ritual-line">it is written, this is the way.</p>
+				<p class="publish-ritual-links">
+					<a href={liveHref}>open it</a>
+					<span aria-hidden="true">·</span>
+					<a href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}>keep writing</a>
+					<span aria-hidden="true">·</span>
+					<span class="publish-ritual-soft">the site will catch up</span>
+				</p>
+			</div>
 		)
 	}
 	{error === 'title' && <p class="admin-error">needs a name.</p>}
@@ -69,7 +80,7 @@ function parseDay(value: string) {
 		<p class="admin-kicker">posts</p>
 		{
 			posts.length === 0 ? (
-				<p class="empty-poem">nothing written yet.</p>
+				<p class="empty">nothing written yet.</p>
 			) : (
 				<ul class="admin-list">
 					{posts.map((post) => (
@@ -84,6 +95,16 @@ function parseDay(value: string) {
 								{post.draft ? 'draft' : 'live'}
 							</span>
 							<span class="admin-post-date">{parseDay(post.pubDate)}</span>
+							{!post.draft && (
+								<a
+									class="admin-journal-write"
+									href={`/journals/${journal.id}/${post.id}`}
+									target="_blank"
+									rel="noreferrer"
+								>
+									open
+								</a>
+							)}
 							<a
 								class="admin-journal-write"
 								href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}&slug=${encodeURIComponent(post.id)}`}
@@ -101,12 +122,19 @@ function parseDay(value: string) {
 	</section>
 </AdminLayout>
 
+{saved === 'post' && <PublishDing />}
+
 <script>
-	if (document.querySelector('[data-clear-draft]')) {
+	const ritual = document.querySelector<HTMLElement>('[data-publish-ritual]');
+	if (ritual) {
+		const key = ritual.dataset.clearDraft;
 		try {
+			if (key) localStorage.removeItem(key);
 			localStorage.removeItem('post-draft');
+			localStorage.removeItem('post-draft:new');
 		} catch {
 			/* ignore */
 		}
+		window.playPublishDing?.();
 	}
 </script>

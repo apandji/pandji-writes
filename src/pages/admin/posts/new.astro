@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import MarkdownEditor from '../../../components/MarkdownEditor.astro';
+import PublishDing from '../../../components/PublishDing.astro';
 import Button from '../../../components/Button.astro';
 import { getPostForAdmin, listJournalsForAdmin } from '../../../lib/github';
 
@@ -40,6 +41,11 @@ const crumbLabel = existing?.title
 	: editing
 		? 'edit'
 		: 'new post';
+const draftKey = existing ? `post-draft:${existing.id}` : 'post-draft:new';
+const liveHref =
+	existing && !existing.draft && journal
+		? `/journals/${journal.id}/${existing.id}`
+		: '';
 ---
 
 <AdminLayout
@@ -57,7 +63,7 @@ const crumbLabel = existing?.title
 		loadError ? (
 			<p class="admin-error">{loadError}</p>
 		) : journals.length === 0 ? (
-			<p class="empty-poem">
+			<p class="empty">
 				make a journal first. <a href="/admin/journals/new">+</a>
 			</p>
 		) : (
@@ -68,11 +74,38 @@ const crumbLabel = existing?.title
 				enctype="multipart/form-data"
 				data-resume={resume ? '1' : '0'}
 				data-prefer-journal={journalId}
+				data-write-desk
+				data-draft-key={draftKey}
 			>
 				{existing && <input type="hidden" name="slug" value={existing.id} />}
-				<input type="hidden" name="intent" value="publish" data-intent />
+				<input type="hidden" name="intent" value="draft" data-intent />
 
-				<div class="write-meta">
+				<div class="write-desk-top">
+					<label class="write-title write-title--hero">
+						<span class="visually-hidden">title</span>
+						<input
+							type="text"
+							name="title"
+							required
+							maxlength="120"
+							placeholder="what is this about?"
+							value={existing?.title ?? ''}
+							autocomplete="off"
+						/>
+					</label>
+					<div class="write-desk-tools">
+						{liveHref && (
+							<a class="write-live-link" href={liveHref} target="_blank" rel="noreferrer">
+								view live
+							</a>
+						)}
+						<button type="button" class="theme-toggle" data-write-focus>
+							focus
+						</button>
+					</div>
+				</div>
+
+				<div class="write-meta write-meta--quiet">
 					<label>
 						<span>journal</span>
 						<select name="journal" required>
@@ -83,17 +116,6 @@ const crumbLabel = existing?.title
 							))}
 						</select>
 					</label>
-					<label class="write-title">
-						<span>title</span>
-						<input
-							type="text"
-							name="title"
-							required
-							maxlength="120"
-							placeholder="what is this about?"
-							value={existing?.title ?? ''}
-						/>
-					</label>
 					<label>
 						<span>date</span>
 						<input type="date" name="pubDate" value={existing?.pubDate || today} required />
@@ -101,8 +123,7 @@ const crumbLabel = existing?.title
 				</div>
 
 				<div class="admin-field write-body">
-					<span class="write-body-label">body</span>
-					<MarkdownEditor value={existing?.body ?? ''} />
+					<MarkdownEditor value={existing?.body ?? ''} draftKey={draftKey} />
 				</div>
 
 				<div class="write-actions">
@@ -111,11 +132,7 @@ const crumbLabel = existing?.title
 						<Button data-set-intent="publish">publish</Button>
 					</div>
 					<p class="admin-hint">
-						{
-							editing
-								? 'this writes over the post. draft stays private · publish waits for a rebuild'
-								: 'draft stays private · publish waits for a rebuild'
-						}
+						⌘/Ctrl+Enter saves a draft · ⌘/Ctrl+Shift+Enter publishes · the site catches up after publish
 					</p>
 				</div>
 				{errorText && <p class="admin-error">{errorText}</p>}
@@ -123,3 +140,33 @@ const crumbLabel = existing?.title
 		)
 	}
 </AdminLayout>
+
+<PublishDing />
+
+<script>
+	const desk = document.querySelector('[data-write-desk]');
+	const focusBtn = document.querySelector<HTMLButtonElement>('[data-write-focus]');
+	const title = desk?.querySelector<HTMLInputElement>('input[name="title"]');
+	const body = desk?.querySelector<HTMLTextAreaElement>('[data-md-body]');
+
+	function setFocus(on: boolean) {
+		document.body.classList.toggle('is-write-focus', on);
+		if (focusBtn) focusBtn.textContent = on ? 'leave focus' : 'focus';
+	}
+
+	focusBtn?.addEventListener('click', () => {
+		setFocus(!document.body.classList.contains('is-write-focus'));
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && document.body.classList.contains('is-write-focus')) {
+			setFocus(false);
+		}
+	});
+
+	if (body && !body.value.trim()) {
+		body.focus();
+	} else if (title && !title.value.trim()) {
+		title.focus();
+	}
+</script>

@@ -1,0 +1,51 @@
+---
+/**
+ * Soft two-tone publish chime. Call playPublishDing() after a successful publish.
+ */
+---
+
+<script>
+	declare global {
+		interface Window {
+			playPublishDing?: () => void;
+		}
+	}
+
+	window.playPublishDing = () => {
+		try {
+			const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+			const ctx = new AudioCtx();
+			const now = ctx.currentTime;
+			const tones = [
+				{ freq: 523.25, when: 0, peak: 0.09, life: 1.1 },
+				{ freq: 659.25, when: 0.07, peak: 0.07, life: 1.25 },
+				{ freq: 783.99, when: 0.14, peak: 0.045, life: 1.45 },
+			];
+
+			for (const tone of tones) {
+				const osc = ctx.createOscillator();
+				const gain = ctx.createGain();
+				const filter = ctx.createBiquadFilter();
+				osc.type = 'sine';
+				osc.frequency.value = tone.freq;
+				filter.type = 'lowpass';
+				filter.frequency.value = 2400;
+				const start = now + tone.when;
+				gain.gain.setValueAtTime(0.0001, start);
+				gain.gain.exponentialRampToValueAtTime(tone.peak, start + 0.03);
+				gain.gain.exponentialRampToValueAtTime(0.0001, start + tone.life);
+				osc.connect(filter);
+				filter.connect(gain);
+				gain.connect(ctx.destination);
+				osc.start(start);
+				osc.stop(start + tone.life + 0.05);
+			}
+
+			window.setTimeout(() => {
+				void ctx.close();
+			}, 1800);
+		} catch {
+			/* audio optional */
+		}
+	};
+</script>

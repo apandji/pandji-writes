@@ -27,7 +27,7 @@ A self-hosted starter is a fine later gift for people who want the files. It is 
 
 - `{name} writes.` as the identity (not “April’s Blog”)
 - Journals as rooms, posts as a scrollable feed
-- Quiet type, marks, light/dark, empty poems
+- Quiet type, marks, light/dark, plain empty states
 - Markdown writing with the existing toolbar
 
 ## Replace
@@ -48,7 +48,7 @@ A self-hosted starter is a fine later gift for people who want the files. It is 
 
 **Journals + posts.** A few named journals, dated posts, images, links, optional diagram fence. Not tags, not a CMS, not a homepage builder.
 
-**It looks like writing, even empty.** The poems and marks are not decoration. They are why this is not Substack.
+**It looks like writing, even empty.** Quiet empty states and marks are not decoration. They are why this is not Substack.
 
 **Own the words.** Export Markdown and images from day one. That is the honest version of “lightweight and open.” People will trust it more if they can leave.
 

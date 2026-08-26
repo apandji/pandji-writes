@@ -19,7 +19,7 @@ const entries = await readHistory();
 		<p class="admin-kicker">history</p>
 		{
 			entries.length === 0 ? (
-				<p class="empty-poem">nothing logged yet.</p>
+				<p class="empty">nothing logged yet.</p>
 			) : (
 				<ul class="admin-history">
 					{entries.map((entry) => (
