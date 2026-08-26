@@ -1,6 +1,6 @@
 # Portfolio roadmap
 
-Use this site’s stack as the foundation for a personal portfolio — not a second product, and not the multi-tenant `{name} writes.` idea in `the-future-product.md`.
+Use this site’s stack as the foundation for a personal portfolio — not a second product, and not the open-source `{name} writes.` gift in `the-future-product.md`.
 
 Map of forks and other jumping points: `where-this-could-go.md`.
 
@@ -262,7 +262,7 @@ Add one type at a time using the rule above. Prefer shipping a real Talk or Maki
 ## Deliberately later
 
 - Multi-author / collaborative journals (separate concern from this personal portfolio)
-- Hosted `{name} writes.` product (`the-future-product.md`)
+- Open-source `{name} writes.` class gift (`the-future-product.md`) — keep that in a separate template repo when packaged
 - Comments, likes, global discovery feed
 - Heavy theming, page builders, drag-and-drop layouts
 - Tag taxonomies as navigation (motifs are not a public index)
@@ -270,7 +270,7 @@ Add one type at a time using the rule above. Prefer shipping a real Talk or Maki
 - Custom domains per section
 - Database-backed CMS for solo use
 
-Other jumping points (starter template, desk-as-craft, garden layer, etc.): `where-this-could-go.md`.
+Other jumping points (desk-as-craft, garden layer, class gallery, etc.): `where-this-could-go.md`.
 
 ## What would break the spell
 
@@ -279,7 +279,7 @@ Other jumping points (starter template, desk-as-craft, garden layer, etc.): `whe
 - Card grids, stat strips, and floating badges on the hero
 - A generic “content item” table that erases type-specific reading
 - Making GitHub setup the visitor’s problem (it is only the author’s publish path)
-- Building the multi-tenant product under the guise of a portfolio
+- Building the class gift or a multi-tenant host under the guise of a portfolio
 - Letting fuzzy links (tags, motifs, kin) become the sitemap
 
 ## First slice, when building starts
