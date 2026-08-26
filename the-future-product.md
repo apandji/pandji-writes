@@ -183,10 +183,12 @@ Making *you* the host of everyone’s writing. A setup that requires editing fiv
 
 ## First slice, if this is ever packaged
 
-1. Site name/author as config in `pandji-writes` (practice the seam).
-2. New repo **`writes`**: extract app shell, no personal posts; enable GitHub Template.
-3. Same name config + five-step MDes README (template → Vercel → env → name → first post).
+1. ~~Site name/author as config in `pandji-writes`~~ (`SITE_NAME` seam — done).
+2. New repo **`apandji/writes`**: extract app shell, no personal posts; enable GitHub Template.
+3. Same name config + five-step README (template → Vercel → env → name → first post).
 4. Tag `v0.1.0` + short changelog; one sample journal empty of your voice.
 5. Hand to 2–3 friends before the whole class.
+
+**Status:** template is prepared and builds locally (`SITE_NAME=april` → **april writes.**). Waiting on an empty public repo at https://github.com/apandji/writes to push `v0.1.0`, then mark it as a Template repository and share the link.
 
 That is enough to gift. Hosting many writers on one app is a different story — only if the template spreads and people ask for zero-setup.

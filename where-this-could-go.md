@@ -20,7 +20,7 @@ Do not build these yet. This is a map of jumping points.
 | Fork | What it is | Stack shift |
 | --- | --- | --- |
 | **Portfolio** | Your site holds writings *and* work | Same Astro + Markdown + GitHub admin; new types and home |
-| **Gift** | Classmates get their own **april writes.** | Template repo + name config + setup guide; each person hosts themselves |
+| **Gift (`writes.`)** | Classmates get their own **april writes.** | Separate `writes` template repo; name config; each person hosts themselves |
 
 Same *feel* (rooms, quiet type, Markdown desk). Different *jobs*. Do not build class features into your portfolio home, or portfolio CMS complexity into the gift template.
 
