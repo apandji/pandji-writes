@@ -33,7 +33,7 @@ function parseDay(value: string) {
 	title={journal.title}
 	crumbs={[
 		{ href: '/admin', label: 'admin' },
-		{ label: journal.title.toLowerCase() },
+		{ label: journal.title },
 	]}
 >
 	{
@@ -61,7 +61,10 @@ function parseDay(value: string) {
 	<section class="admin-section">
 		<header class="write-header">
 			<p class="admin-kicker">posts</p>
-			<Button href={writeHref}>write</Button>
+			<div class="write-header-actions">
+				<a class="admin-journal-write" href={`/admin/journals/${journal.id}/settings`}>settings</a>
+				<Button href={writeHref}>write</Button>
+			</div>
 		</header>
 		{
 			posts.length === 0 ? (
@@ -76,10 +79,11 @@ function parseDay(value: string) {
 							>
 								{post.title}
 							</a>
-							<span class:list={['admin-flag', post.draft ? 'is-draft' : 'is-live']}>
-								{post.draft ? 'draft' : 'live'}
+							<span class="admin-post-meta">
+								<span class="admin-flag">{post.draft ? 'draft' : 'live'}</span>
+								<span aria-hidden="true">·</span>
+								<span class="admin-post-date">{parseDay(post.pubDate)}</span>
 							</span>
-							<span class="admin-post-date">{parseDay(post.pubDate)}</span>
 							{!post.draft && (
 								<a
 									class="admin-journal-write"
@@ -90,20 +94,11 @@ function parseDay(value: string) {
 									open
 								</a>
 							)}
-							<a
-								class="admin-journal-write"
-								href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}&slug=${encodeURIComponent(post.id)}`}
-							>
-								edit
-							</a>
 						</li>
 					))}
 				</ul>
 			)
 		}
-		<p class="admin-write-row">
-			<a class="admin-journal-write" href={`/admin/journals/${journal.id}/settings`}>settings</a>
-		</p>
 	</section>
 </AdminLayout>
 

@@ -36,11 +36,7 @@ const errorText =
 const journalId = existing?.journal || (journals.some((item) => item.id === selectedJournal) ? selectedJournal : '');
 const journal = journals.find((item) => item.id === journalId);
 const editing = Boolean(existing);
-const crumbLabel = existing?.title
-	? existing.title.toLowerCase()
-	: editing
-		? 'edit'
-		: 'new post';
+const crumbLabel = existing?.title ? existing.title : editing ? 'edit' : 'new post';
 const draftKey = existing ? `post-draft:${existing.id}` : 'post-draft:new';
 const liveHref =
 	existing && !existing.draft && journal
@@ -54,7 +50,7 @@ const liveHref =
 	crumbs={[
 		{ href: '/admin', label: 'admin' },
 		...(journal
-			? [{ href: `/admin/journals/${journal.id}`, label: journal.title.toLowerCase() }]
+			? [{ href: `/admin/journals/${journal.id}`, label: journal.title }]
 			: []),
 		{ label: crumbLabel },
 	]}

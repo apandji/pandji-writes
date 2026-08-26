@@ -25,7 +25,7 @@ const mark = journalMark(journal.id, journal.emoji);
 	title={`${journal.title} settings`}
 	crumbs={[
 		{ href: '/admin', label: 'admin' },
-		{ href: `/admin/journals/${journal.id}`, label: journal.title.toLowerCase() },
+		{ href: `/admin/journals/${journal.id}`, label: journal.title },
 		{ label: 'settings' },
 	]}
 >
