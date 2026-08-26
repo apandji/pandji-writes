@@ -902,6 +902,25 @@ body.is-admin::before {
 	color: var(--text);
 }
 
+.admin-write-row {
+	margin: 1.35rem 0 0;
+}
+
+.admin-write-btn {
+	display: inline-block;
+	padding: 0.4rem 0.95rem;
+	border: 1px solid var(--text);
+	color: var(--text);
+	font-size: 0.875rem;
+	line-height: 1.4;
+}
+
+.admin-write-btn:hover {
+	background: var(--text);
+	color: var(--bg);
+	text-decoration: none;
+}
+
 .mark-picker {
 	display: flex;
 	flex-wrap: wrap;

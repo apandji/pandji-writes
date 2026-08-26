@@ -49,13 +49,6 @@ function parseDay(value: string) {
 			<p class="admin-kicker admin-kicker--row">
 				<span class="home-mark" aria-hidden="true">{mark}</span>
 				{journal.title.toLowerCase()}
-				<a
-					class="admin-add"
-					href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}
-					aria-label={`write in ${journal.title}`}
-				>
-					+
-				</a>
 			</p>
 		</header>
 		{
@@ -80,6 +73,11 @@ function parseDay(value: string) {
 				</ul>
 			)
 		}
+		<p class="admin-write-row">
+			<a class="admin-write-btn" href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}>
+				write
+			</a>
+		</p>
 	</section>
 </AdminLayout>
 
