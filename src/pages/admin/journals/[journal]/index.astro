@@ -3,7 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import PublishDing from '../../../../components/PublishDing.astro';
-import { formatDate } from '../../../../lib/site';
+import { formatDate, journalMark } from '../../../../lib/site';
 import { listJournalsForAdmin, listPostsForAdmin } from '../../../../lib/github';
 import Button from '../../../../components/Button.astro';
 
@@ -20,6 +20,7 @@ if (!journal) {
 }
 
 const posts = (await listPostsForAdmin()).filter((post) => post.journal === journal.id);
+const mark = journalMark(journal.id, journal.emoji);
 const liveHref = publishedSlug ? `/journals/${journal.id}/${publishedSlug}` : `/journals/${journal.id}`;
 const writeHref = `/admin/posts/new?journal=${encodeURIComponent(journal.id)}`;
 
@@ -29,13 +30,7 @@ function parseDay(value: string) {
 }
 ---
 
-<AdminLayout
-	title={journal.title}
-	crumbs={[
-		{ href: '/admin', label: 'admin' },
-		{ label: journal.title },
-	]}
->
+<AdminLayout title={journal.title}>
 	{
 		saved === 'draft' && (
 			<p class="admin-note" data-clear-draft={clearDraftKey || 'post-draft:new'}>
@@ -60,11 +55,14 @@ function parseDay(value: string) {
 
 	<section class="admin-section">
 		<header class="write-header">
-			<p class="admin-kicker">posts</p>
-			<div class="write-header-actions">
+			<div class="admin-room">
+				<h1 class="admin-room-title">
+					<span class="home-mark" aria-hidden="true">{mark}</span>
+					<span class="home-name">{journal.title}</span>
+				</h1>
 				<a class="admin-journal-write" href={`/admin/journals/${journal.id}/settings`}>settings</a>
-				<Button href={writeHref}>write</Button>
 			</div>
+			<Button href={writeHref}>write</Button>
 		</header>
 		{
 			posts.length === 0 ? (

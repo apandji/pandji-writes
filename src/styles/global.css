@@ -526,11 +526,22 @@ body.is-admin::before {
 	flex-wrap: wrap;
 }
 
-.write-header-actions {
+.admin-room {
 	display: flex;
-	align-items: center;
-	gap: 0.9rem;
-	flex: none;
+	align-items: baseline;
+	gap: 0.75rem;
+	min-width: 0;
+	flex: 1;
+}
+
+.admin-room-title {
+	display: flex;
+	align-items: baseline;
+	gap: 0.7rem;
+	margin: 0;
+	min-width: 0;
+	font-size: inherit;
+	font-weight: inherit;
 }
 
 .admin-section {
