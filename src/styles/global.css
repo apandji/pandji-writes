@@ -144,6 +144,7 @@ a:hover {
 	flex: none;
 	font-size: 1.05rem;
 	line-height: 1.3;
+	font-variant-emoji: text;
 }
 
 .home-name {
@@ -969,7 +970,8 @@ body.is-admin::before {
 .mark-picker {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.45rem 0.85rem;
+	align-items: center;
+	gap: 0.35rem;
 	margin: 0;
 	padding: 0.85rem 0 0;
 	border: 0;
@@ -986,19 +988,51 @@ body.is-admin::before {
 .mark-choice {
 	display: flex !important;
 	grid-template-columns: none;
-	flex-direction: row;
-	align-items: baseline;
-	gap: 0.35rem;
-	width: auto;
+	position: relative;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	margin: 0;
 	color: var(--text);
 	font-size: 1rem;
 	cursor: pointer;
 }
 
-.mark-choice input {
+.mark-choice:has(input[value='']),
+.mark-choice--text {
 	width: auto;
+	padding-inline: 0.45rem;
+	height: 2rem;
+}
+
+.mark-choice input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
 	margin: 0;
+	opacity: 0;
+	cursor: pointer;
 	accent-color: var(--text);
+}
+
+.mark-choice .home-mark {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	border: 1px solid transparent;
+}
+
+.mark-choice:hover .home-mark,
+.mark-choice input:focus-visible + .home-mark {
+	background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.mark-choice input:checked + .home-mark,
+.mark-choice input:checked + span {
+	border-color: var(--text);
 }
 
 .admin-hint,
