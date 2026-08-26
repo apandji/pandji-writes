@@ -31,7 +31,7 @@ const pageTitle = title ? `${title} — ${adminName}` : adminName;
 		<Font cssVariable="--font-mono" />
 		<script is:inline>
 			(() => {
-				const themes = ['light', 'dark', 'e-ink', 'sumi'];
+				const themes = ['light', 'dark', 'e-ink'];
 				const stored = localStorage.getItem('theme');
 				const theme = themes.includes(stored)
 					? stored
@@ -80,7 +80,7 @@ const pageTitle = title ? `${title} — ${adminName}` : adminName;
 			</main>
 		</div>
 		<script>
-			const themes = ['light', 'dark', 'e-ink', 'sumi'] as const;
+			const themes = ['light', 'dark', 'e-ink'] as const;
 			const button = document.querySelector('[data-theme-toggle]');
 			const root = document.documentElement;
 

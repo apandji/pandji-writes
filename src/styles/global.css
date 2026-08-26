@@ -19,25 +19,14 @@ html[data-theme='dark'] {
 	color-scheme: dark;
 }
 
-/* Cool gray ground, calm black — like a reader screen */
+/* Darker gray ground, soft charcoal — low contrast, easy on the eyes */
 html[data-theme='e-ink'] {
-	--bg: #d4d4ce;
-	--text: #181816;
-	--muted: #5e5e5a;
-	--soft: #8a8a84;
-	--rule: #bcbcb6;
-	--code-bg: #c8c8c2;
-	color-scheme: light;
-}
-
-/* Washi paper + sumi ink — warm ground, deep brush black */
-html[data-theme='sumi'] {
-	--bg: #efe6d4;
-	--text: #14110c;
-	--muted: #6f6758;
-	--soft: #9a917e;
-	--rule: #d6cbb4;
-	--code-bg: #e4d9c3;
+	--bg: #b0b0aa;
+	--text: #2e2e2b;
+	--muted: #555550;
+	--soft: #72726c;
+	--rule: #9a9a94;
+	--code-bg: #a4a49e;
 	color-scheme: light;
 }
 
