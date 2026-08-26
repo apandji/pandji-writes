@@ -30,7 +30,7 @@ export function parseFrontmatter(raw: string) {
 
 export function journalMarkdown(input: { title: string; emoji?: string; order?: number }) {
 	const lines = ['---', `title: ${escapeYaml(input.title)}`];
-	if (input.emoji) lines.push(`emoji: ${input.emoji}`);
+	if (input.emoji) lines.push(`emoji: ${JSON.stringify(input.emoji)}`);
 	if (typeof input.order === 'number') lines.push(`order: ${input.order}`);
 	lines.push('---', '');
 	return `${lines.join('\n')}\n`;

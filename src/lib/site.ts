@@ -1,4 +1,33 @@
-export const journalMarks = ['⟡', '⬡', '◎', '◈', '✧', '✺', '⊹', '🪩', '🫧', '🪐', '🧿', '💠'] as const;
+export const journalMarks = [
+	'*',
+	'+',
+	'x',
+	'o',
+	'v',
+	'^',
+	'~',
+	'#',
+	'@',
+	'=',
+	'/',
+	'!',
+	'?',
+	'$',
+	'%',
+	'&',
+	'<',
+	'>',
+	'[',
+	']',
+	'{',
+	'}',
+	'_',
+	'-',
+] as const;
+
+export function isJournalMark(value: string) {
+	return (journalMarks as readonly string[]).includes(value);
+}
 
 export const site = {
 	name: 'pandji writes.',

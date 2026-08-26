@@ -1,4 +1,5 @@
 import { parseFrontmatter } from './content-files';
+import { HISTORY_PATH, historyLine, parseHistory, type HistoryEntry } from './history';
 
 const API = 'https://api.github.com';
 
@@ -7,7 +8,7 @@ export type GithubFile = {
 	content: string | Uint8Array;
 };
 
-type GithubJournal = {
+export type GithubJournal = {
 	id: string;
 	title: string;
 	emoji?: string;
@@ -61,7 +62,49 @@ function toBase64(content: string | Uint8Array) {
 	return btoa(binary);
 }
 
-export async function commitFiles(files: GithubFile[], message: string) {
+export async function getRepoFile(path: string): Promise<string | null> {
+	try {
+		const file = await github(`/contents/${path}?ref=${encodeURIComponent(config().branch)}`);
+		if (!file?.content || typeof file.content !== 'string') return null;
+		return Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8');
+	} catch (error) {
+		if (error instanceof Error && error.message.includes('404')) return null;
+		throw error;
+	}
+}
+
+export async function readHistory(): Promise<HistoryEntry[]> {
+	const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+	const repo = import.meta.env.GITHUB_REPO || process.env.GITHUB_REPO;
+	if (token && repo) {
+		try {
+			const raw = await getRepoFile(HISTORY_PATH);
+			if (raw) return parseHistory(raw);
+		} catch {
+			/* local fallback below */
+		}
+	}
+
+	try {
+		const { readFile } = await import('node:fs/promises');
+		const { join } = await import('node:path');
+		const raw = await readFile(join(process.cwd(), HISTORY_PATH), 'utf8');
+		return parseHistory(raw);
+	} catch {
+		return [];
+	}
+}
+
+export async function commitFiles(files: GithubFile[], message: string, historySummary?: string) {
+	const payload = [...files];
+	if (historySummary?.trim()) {
+		const existing = (await getRepoFile(HISTORY_PATH)) ?? '';
+		payload.push({
+			path: HISTORY_PATH,
+			content: historyLine(historySummary.trim()) + existing,
+		});
+	}
+
 	const { branch } = config();
 	const ref = await github(`/git/ref/heads/${branch}`);
 	const commitSha = ref.object.sha as string;
@@ -69,7 +112,7 @@ export async function commitFiles(files: GithubFile[], message: string) {
 	const baseTree = commit.tree.sha as string;
 
 	const treeItems = [];
-	for (const file of files) {
+	for (const file of payload) {
 		const blob = await github('/git/blobs', {
 			method: 'POST',
 			body: JSON.stringify({

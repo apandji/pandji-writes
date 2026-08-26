@@ -110,7 +110,13 @@ const crumbLabel = existing?.title
 						<Button data-set-intent="draft">save draft</Button>
 						<Button data-set-intent="publish">publish</Button>
 					</div>
-					<p class="admin-hint">draft stays private · publish waits for a rebuild</p>
+					<p class="admin-hint">
+						{
+							editing
+								? 'this writes over the post. draft stays private · publish waits for a rebuild'
+								: 'draft stays private · publish waits for a rebuild'
+						}
+					</p>
 				</div>
 				{errorText && <p class="admin-error">{errorText}</p>}
 			</form>

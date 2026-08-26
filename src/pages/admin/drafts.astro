@@ -56,6 +56,12 @@ function parseDay(value: string) {
 								{(journalTitle[post.journal] ?? post.journal).toLowerCase()}
 								· {parseDay(post.pubDate)}
 							</span>
+							<a
+								class="admin-journal-write"
+								href={`/admin/posts/new?journal=${encodeURIComponent(post.journal)}&slug=${encodeURIComponent(post.id)}`}
+							>
+								edit
+							</a>
 						</li>
 					))}
 				</ul>

@@ -6,13 +6,14 @@ import { journalMark } from '../../lib/site';
 import { listJournalsForAdmin } from '../../lib/github';
 
 const saved = Astro.url.searchParams.get('saved');
+const error = Astro.url.searchParams.get('error');
 let journals: { id: string; title: string; emoji?: string }[] = [];
 let loadError = '';
 
 try {
 	journals = await listJournalsForAdmin();
-} catch (error) {
-	loadError = error instanceof Error ? error.message : 'could not read the repo.';
+} catch (err) {
+	loadError = err instanceof Error ? err.message : 'could not read the repo.';
 }
 
 const note =
@@ -20,12 +21,15 @@ const note =
 		? 'journal committed. the site will catch up in a minute.'
 		: saved === 'post'
 			? 'post published. the site will catch up in a minute.'
-			: '';
+			: saved === 'order'
+				? 'order saved. the site will catch up in a minute.'
+				: '';
 ---
 
 <AdminLayout>
 	{note && <p class="admin-note">{note}</p>}
 	{loadError && <p class="admin-error">{loadError}</p>}
+	{error && <p class="admin-error">{error}</p>}
 
 	<section class="admin-section">
 		<header class="write-header">
@@ -39,7 +43,7 @@ const note =
 				<p class="empty-poem">nothing here yet.</p>
 			) : (
 				<ul class="admin-list">
-					{journals.map((journal) => (
+					{journals.map((journal, index) => (
 						<li>
 							<span class="home-mark" aria-hidden="true">
 								{journalMark(journal.id, journal.emoji)}
@@ -47,6 +51,28 @@ const note =
 							<a class="admin-journal-name" href={`/admin/journals/${journal.id}`}>
 								{journal.title}
 							</a>
+							<span class="admin-order">
+								<form method="post" action="/api/admin/journals">
+									<input type="hidden" name="intent" value="reorder" />
+									<input type="hidden" name="id" value={journal.id} />
+									<input type="hidden" name="dir" value="up" />
+									<button class="admin-text-btn" type="submit" disabled={index === 0}>
+										up
+									</button>
+								</form>
+								<form method="post" action="/api/admin/journals">
+									<input type="hidden" name="intent" value="reorder" />
+									<input type="hidden" name="id" value={journal.id} />
+									<input type="hidden" name="dir" value="down" />
+									<button
+										class="admin-text-btn"
+										type="submit"
+										disabled={index === journals.length - 1}
+									>
+										down
+									</button>
+								</form>
+							</span>
 							<a
 								class="admin-journal-write"
 								href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}

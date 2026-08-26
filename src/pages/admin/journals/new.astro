@@ -3,7 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import Button from '../../../components/Button.astro';
-import { journalMarks } from '../../../lib/site';
+import MarkPicker from '../../../components/MarkPicker.astro';
 
 const error = Astro.url.searchParams.get('error');
 ---
@@ -16,26 +16,13 @@ const error = Astro.url.searchParams.get('error');
 	]}
 >
 	<form class="admin-form admin-form--journal" method="post" action="/api/admin/journals">
+		<input type="hidden" name="intent" value="create" />
 		<label>
 			<span>title</span>
 			<input type="text" name="title" required maxlength="80" placeholder="series name" autofocus />
 		</label>
 
-		<fieldset class="mark-picker">
-			<legend>symbol</legend>
-			<label class="mark-choice">
-				<input type="radio" name="emoji" value="" checked />
-				<span>random</span>
-			</label>
-			{
-				journalMarks.map((mark) => (
-					<label class="mark-choice">
-						<input type="radio" name="emoji" value={mark} />
-						<span>{mark}</span>
-					</label>
-				))
-			}
-		</fieldset>
+		<MarkPicker random />
 
 		<div class="write-actions">
 			<Button>save</Button>

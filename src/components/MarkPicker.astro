@@ -1,0 +1,32 @@
+---
+import { isJournalMark, journalMarks } from '../lib/site';
+
+interface Props {
+	selected?: string;
+	random?: boolean;
+}
+
+const { selected = '', random = false } = Astro.props;
+const extras = selected && !isJournalMark(selected) ? [selected] : [];
+const marks = [...extras, ...journalMarks];
+---
+
+<fieldset class="mark-picker">
+	<legend>symbol</legend>
+	{
+		random && (
+			<label class="mark-choice">
+				<input type="radio" name="emoji" value="" checked={!selected} />
+				<span>random</span>
+			</label>
+		)
+	}
+	{
+		marks.map((mark) => (
+			<label class="mark-choice">
+				<input type="radio" name="emoji" value={mark} checked={mark === selected} />
+				<span class="home-mark">{mark}</span>
+			</label>
+		))
+	}
+</fieldset>
