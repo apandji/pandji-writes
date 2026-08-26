@@ -1,6 +1,6 @@
 ---
 title: spatial ai apps
-emoji: ⬡
+emoji: "⬡"
 order: 4
 ---
 
