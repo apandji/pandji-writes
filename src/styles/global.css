@@ -614,7 +614,7 @@ body.is-admin::before {
 	gap: 1.15rem;
 }
 
-.admin-form button[name='intent'][value='draft'] {
+.admin-form button[data-set-intent='draft'] {
 	color: var(--muted);
 }
 

@@ -568,9 +568,9 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 				}
 				if (key === 'enter') {
 					event.preventDefault();
-					const publish = form?.querySelector<HTMLButtonElement>('button[name="intent"][value="publish"]');
-					if (form && publish) form.requestSubmit(publish);
-					else form?.requestSubmit();
+					const intent = form?.querySelector<HTMLInputElement>('[data-intent]');
+					if (intent) intent.value = 'publish';
+					form?.requestSubmit();
 					return;
 				}
 			}
@@ -637,8 +637,19 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 			closeSlash();
 		});
 
-		form?.addEventListener('submit', () => {
+		form?.addEventListener('click', (event) => {
+			const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-set-intent]');
+			const intent = form.querySelector<HTMLInputElement>('[data-intent]');
+			if (button && intent) intent.value = button.dataset.setIntent ?? 'publish';
+		});
+
+		form?.addEventListener('submit', (event) => {
 			if (!form) return;
+			const intent = form.querySelector<HTMLInputElement>('[data-intent]');
+			const submitter = event.submitter;
+			if (intent && submitter instanceof HTMLButtonElement && submitter.dataset.setIntent) {
+				intent.value = submitter.dataset.setIntent;
+			}
 			for (const button of form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')) {
 				button.disabled = true;
 			}

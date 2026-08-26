@@ -188,7 +188,7 @@ function postFromMarkdown(id: string, raw: string): GithubPost {
 		title: data.title ?? id,
 		journal: data.journal ?? '',
 		pubDate: data.pubDate ?? '',
-		draft: data.draft === 'true' || data.draft === 'yes',
+		draft: /^(true|yes|1)$/i.test(data.draft ?? ''),
 		body,
 	};
 }

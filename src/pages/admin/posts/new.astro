@@ -69,6 +69,7 @@ const crumbLabel = existing?.title
 				data-prefer-journal={journalId}
 			>
 				{existing && <input type="hidden" name="slug" value={existing.id} />}
+				<input type="hidden" name="intent" value="publish" data-intent />
 
 				<div class="write-meta">
 					<label>
@@ -105,8 +106,8 @@ const crumbLabel = existing?.title
 
 				<div class="write-actions">
 					<div class="write-actions-buttons">
-						<button type="submit" name="intent" value="draft">save draft</button>
-						<button type="submit" name="intent" value="publish">publish</button>
+						<button type="submit" data-set-intent="draft">save draft</button>
+						<button type="submit" data-set-intent="publish">publish</button>
 					</div>
 					<p class="admin-hint">draft stays private · publish waits for a rebuild</p>
 				</div>
