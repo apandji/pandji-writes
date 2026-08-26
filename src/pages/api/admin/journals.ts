@@ -45,7 +45,7 @@ async function createJournal(data: FormData, redirect: APIRoute['redirect']) {
 	);
 
 	const id = path.replace(/^src\/content\/journals\//, '').replace(/\.md$/, '');
-	return redirect(`/admin/journals/${id}?saved=journal`);
+	return redirect(`/admin/posts/new?journal=${encodeURIComponent(id)}`);
 }
 
 async function updateJournal(data: FormData, redirect: APIRoute['redirect']) {
@@ -55,7 +55,7 @@ async function updateJournal(data: FormData, redirect: APIRoute['redirect']) {
 		return redirect('/admin');
 	}
 	if (!title) {
-		return redirect(`/admin/journals/${id}?error=title`);
+		return redirect(`/admin/journals/${id}/settings?error=title`);
 	}
 
 	const journals = await listJournalsFromRepo();
@@ -69,7 +69,7 @@ async function updateJournal(data: FormData, redirect: APIRoute['redirect']) {
 	if (current.title !== title) bits.push(`renamed ${current.title.toLowerCase()} to ${title.toLowerCase()}`);
 	if ((current.emoji ?? '') !== emoji) bits.push(`set ${title.toLowerCase()} mark to ${emoji}`);
 	if (bits.length === 0) {
-		return redirect(`/admin/journals/${id}`);
+		return redirect(`/admin/journals/${id}/settings`);
 	}
 
 	const order = current.order ?? journals.findIndex((journal) => journal.id === id) + 1;
@@ -79,7 +79,7 @@ async function updateJournal(data: FormData, redirect: APIRoute['redirect']) {
 		bits.join('; '),
 	);
 
-	return redirect(`/admin/journals/${id}?saved=journal`);
+	return redirect(`/admin/journals/${id}/settings?saved=journal`);
 }
 
 async function reorderJournals(data: FormData, redirect: APIRoute['redirect']) {
@@ -129,7 +129,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 		if (intent === 'update') {
 			const id = String(data.get('id') ?? '').trim();
 			if (/^[a-z0-9-]+$/.test(id)) {
-				return redirect(`/admin/journals/${id}?error=${encoded}`);
+				return redirect(`/admin/journals/${id}/settings?error=${encoded}`);
 			}
 		}
 		return redirect(`/admin?error=${encoded}`);

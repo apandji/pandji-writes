@@ -297,6 +297,10 @@ a.site-crumb:hover {
 	line-height: 1.5;
 }
 
+.admin-section .empty {
+	margin-top: 0;
+}
+
 .prose {
 	margin-top: 2.75rem;
 }
@@ -894,6 +898,10 @@ body.is-admin::before {
 }
 
 .admin-journal-write:hover {
+	color: var(--text);
+}
+
+.admin-journal-write--primary {
 	color: var(--text);
 }
 

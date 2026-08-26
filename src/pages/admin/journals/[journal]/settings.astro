@@ -1,0 +1,51 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { journalMark } from '../../../../lib/site';
+import { listJournalsForAdmin } from '../../../../lib/github';
+import Button from '../../../../components/Button.astro';
+import MarkPicker from '../../../../components/MarkPicker.astro';
+
+const { journal: journalId } = Astro.params;
+const saved = Astro.url.searchParams.get('saved');
+const error = Astro.url.searchParams.get('error');
+
+const journals = await listJournalsForAdmin();
+const journal = journals.find((item) => item.id === journalId);
+
+if (!journal) {
+	return Astro.redirect('/admin');
+}
+
+const mark = journalMark(journal.id, journal.emoji);
+---
+
+<AdminLayout
+	title={`${journal.title} settings`}
+	crumbs={[
+		{ href: '/admin', label: 'admin' },
+		{ href: `/admin/journals/${journal.id}`, label: journal.title.toLowerCase() },
+		{ label: 'settings' },
+	]}
+>
+	{saved === 'journal' && <p class="admin-note">journal committed. the site will catch up in a minute.</p>}
+	{error === 'title' && <p class="admin-error">needs a name.</p>}
+	{error && error !== 'title' && <p class="admin-error">{error}</p>}
+
+	<section class="admin-section">
+		<form class="admin-form admin-form--journal" method="post" action="/api/admin/journals">
+			<input type="hidden" name="intent" value="update" />
+			<input type="hidden" name="id" value={journal.id} />
+			<label>
+				<span>name</span>
+				<input type="text" name="title" required maxlength="80" value={journal.title} />
+			</label>
+			<MarkPicker selected={mark} />
+			<div class="write-actions">
+				<Button>save</Button>
+				<p class="admin-hint">name and symbol on the site. the address stays the same.</p>
+			</div>
+		</form>
+	</section>
+</AdminLayout>
