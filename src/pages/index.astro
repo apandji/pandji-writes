@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import EmptyPoem from '../components/EmptyPoem.astro';
+import EmptyNote from '../components/EmptyNote.astro';
 import { getJournals, journalHref } from '../lib/content';
 import { journalMark } from '../lib/site';
 
@@ -10,7 +10,7 @@ const journals = await getJournals();
 <Layout>
 	{
 		journals.length === 0 ? (
-			<EmptyPoem />
+			<EmptyNote message="nothing here yet." />
 		) : (
 			<ul class="home-journals">
 				{journals.map((journal) => (

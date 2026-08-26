@@ -2,7 +2,7 @@
 	--bg: #f2f1ef;
 	--text: #3d3c38;
 	--muted: #8a8984;
-	--poem: #b4b2ab;
+	--soft: #b4b2ab;
 	--rule: #e3e2de;
 	--code-bg: #eae9e5;
 	color-scheme: light;
@@ -12,7 +12,7 @@ html[data-theme='dark'] {
 	--bg: #161615;
 	--text: #d8d6d0;
 	--muted: #8e8d87;
-	--poem: #5a5955;
+	--soft: #5a5955;
 	--rule: #2c2c29;
 	--code-bg: #1f1f1c;
 	color-scheme: dark;
@@ -96,7 +96,7 @@ a:hover {
 }
 
 .site-crumbs-sep {
-	color: var(--poem);
+	color: var(--soft);
 }
 
 .site-crumb {
@@ -277,15 +277,12 @@ a.site-crumb:hover {
 	font-size: 0.875rem;
 }
 
-.empty,
-.empty-poem {
+.empty {
 	margin: 2.5rem 0 0;
-	color: var(--poem);
-	font-weight: 300;
-	font-style: italic;
-	letter-spacing: 0.03em;
-	line-height: 1.75;
-	max-width: 22rem;
+	color: var(--soft);
+	font-weight: 400;
+	letter-spacing: 0.01em;
+	line-height: 1.5;
 }
 
 .prose {
@@ -462,7 +459,7 @@ body.is-admin::before {
 }
 
 .admin-crumbs-sep {
-	color: var(--poem);
+	color: var(--soft);
 }
 
 .admin-kicker--row {
@@ -494,7 +491,7 @@ body.is-admin::before {
 }
 
 .admin-flag.is-draft {
-	color: var(--poem);
+	color: var(--soft);
 }
 
 .admin-flag.is-live {
@@ -808,7 +805,7 @@ body.is-admin::before {
 }
 
 .md-status-hint {
-	color: var(--poem);
+	color: var(--soft);
 	font-style: italic;
 }
 
@@ -1022,7 +1019,7 @@ body.is-admin::before {
 .admin-error,
 .admin-note {
 	margin: 0;
-	color: var(--poem);
+	color: var(--soft);
 	font-size: 0.875rem;
 	font-weight: 300;
 	font-style: italic;

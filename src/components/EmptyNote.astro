@@ -1,0 +1,9 @@
+---
+interface Props {
+	message?: string;
+}
+
+const { message = 'nothing here yet.' } = Astro.props;
+---
+
+<p class="empty">{message}</p>

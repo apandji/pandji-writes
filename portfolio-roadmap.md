@@ -14,7 +14,7 @@ The journal already has the hard parts of a quiet personal site:
 - Journals as rooms, posts as a dated feed
 - Markdown editor with preview, drafts, images, Mermaid
 - Admin auth + GitHub write path
-- Marks, empty poems, light/dark, type that feels like writing
+- Marks, plain empty states, light/dark, type that feels like writing
 
 A portfolio should **reuse that foundation** and add presentation for work that is not a chronological post. It should not restart as a page builder, a Notion export, or a theme marketplace.
 
@@ -155,7 +155,7 @@ Nav stays minimal: home, writings (or journals), work, maybe about. No mega-menu
 | Markdown editor | Yes for long copy | Project metadata fields beside the body |
 | Image upload → `public/uploads/` | Fine for covers and stills | Blob/CDN only when audio/video or large galleries appear |
 | Admin auth + GitHub commits | Yes for solo portfolio | Multi-author is a different roadmap |
-| Marks / poems / theme | Yes | Project pages can stay quieter — avoid card grids that fight the writing aesthetic |
+| Marks / empty states / theme | Yes | Project pages can stay quieter — avoid card grids that fight the writing aesthetic |
 
 Git-as-CMS remains right for one person’s portfolio. Switching writes to a database is optional later and is **not** required to ship writings + projects.
 

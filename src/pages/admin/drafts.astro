@@ -34,14 +34,14 @@ function parseDay(value: string) {
 			<a href="/admin/posts/new?resume=1">continue</a>
 			<span data-draft-title></span>
 		</p>
-		<p class="empty-poem" data-local-empty hidden>nothing open on this browser.</p>
+		<p class="empty" data-local-empty hidden>nothing open on this browser.</p>
 	</section>
 
 	<section class="admin-section">
 		<p class="admin-kicker">saved drafts</p>
 		{
 			drafts.length === 0 ? (
-				<p class="empty-poem">nothing waiting to publish.</p>
+				<p class="empty">nothing waiting to publish.</p>
 			) : (
 				<ul class="admin-list">
 					{drafts.map((post) => (
