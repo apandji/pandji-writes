@@ -8,6 +8,7 @@ import { listJournalsForAdmin, listPostsForAdmin } from '../../lib/github';
 const journals = await listJournalsForAdmin();
 const journalTitle = Object.fromEntries(journals.map((journal) => [journal.id, journal.title]));
 const drafts = (await listPostsForAdmin()).filter((post) => post.draft);
+const clearDraftKey = Astro.url.searchParams.get('clear') ?? '';
 
 function parseDay(value: string) {
 	const date = new Date(`${value}T00:00:00Z`);
@@ -24,16 +25,15 @@ function parseDay(value: string) {
 >
 	{
 		Astro.url.searchParams.get('saved') === 'draft' && (
-			<p class="admin-note">draft saved. it stays off the public site until you publish.</p>
+			<p class="admin-note" data-clear-draft={clearDraftKey || 'post-draft:new'}>
+				draft saved. it stays off the public site until you publish.
+			</p>
 		)
 	}
 
 	<section class="admin-section">
 		<p class="admin-kicker">on this device</p>
-		<p class="admin-draft" data-local-draft hidden>
-			<a href="/admin/posts/new?resume=1">continue</a>
-			<span data-draft-title></span>
-		</p>
+		<ul class="admin-list" data-local-drafts hidden></ul>
 		<p class="empty" data-local-empty hidden>nothing open on this browser.</p>
 	</section>
 
@@ -71,21 +71,55 @@ function parseDay(value: string) {
 </AdminLayout>
 
 <script>
-	const row = document.querySelector<HTMLElement>('[data-local-draft]');
-	const empty = document.querySelector<HTMLElement>('[data-local-empty]');
-	const titleEl = document.querySelector<HTMLElement>('[data-draft-title]');
-	if (row && empty) {
+	const clearNode = document.querySelector<HTMLElement>('[data-clear-draft]');
+	if (clearNode) {
+		const key = clearNode.dataset.clearDraft;
 		try {
-			const raw = localStorage.getItem('post-draft');
-			const draft = raw ? (JSON.parse(raw) as { title?: string; body?: string }) : null;
-			if (draft && (draft.body?.trim() || draft.title?.trim())) {
-				row.hidden = false;
-				if (titleEl && draft.title?.trim()) titleEl.textContent = `· ${draft.title.trim()}`;
-			} else {
-				empty.hidden = false;
-			}
+			if (key) localStorage.removeItem(key);
+			localStorage.removeItem('post-draft');
 		} catch {
+			/* ignore */
+		}
+	}
+
+	const list = document.querySelector<HTMLUListElement>('[data-local-drafts]');
+	const empty = document.querySelector<HTMLElement>('[data-local-empty]');
+	if (list && empty) {
+		const keys = Object.keys(localStorage).filter(
+			(key) => key === 'post-draft' || key.startsWith('post-draft:'),
+		);
+		const items: { key: string; title: string; journal?: string }[] = [];
+		for (const key of keys) {
+			try {
+				const draft = JSON.parse(localStorage.getItem(key) || '') as {
+					title?: string;
+					body?: string;
+					journal?: string;
+				};
+				if (!draft.body?.trim() && !draft.title?.trim()) continue;
+				items.push({
+					key,
+					title: draft.title?.trim() || 'untitled',
+					journal: draft.journal,
+				});
+			} catch {
+				/* ignore */
+			}
+		}
+
+		if (items.length === 0) {
 			empty.hidden = false;
+		} else {
+			list.hidden = false;
+			for (const item of items) {
+				const li = document.createElement('li');
+				const resume =
+					item.key === 'post-draft' || item.key === 'post-draft:new'
+						? `/admin/posts/new?resume=1${item.journal ? `&journal=${encodeURIComponent(item.journal)}` : ''}`
+						: `/admin/posts/new?slug=${encodeURIComponent(item.key.replace(/^post-draft:/, ''))}&resume=1`;
+				li.innerHTML = `<a class="admin-journal-name" href="${resume}">continue</a><span class="admin-post-date">${item.title}</span>`;
+				list.append(li);
+			}
 		}
 	}
 </script>
