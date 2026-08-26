@@ -1,5 +1,5 @@
 ---
-title: Programming Usable Interfaces
+title: "Programming Usable Interfaces, 2026"
 emoji: "⊙"
 order: 1
 ---
