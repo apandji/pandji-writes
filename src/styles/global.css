@@ -480,9 +480,16 @@ body.is-admin::before {
 
 .admin-flag {
 	flex: none;
-	color: var(--poem);
 	font-size: 0.75rem;
 	font-style: italic;
+}
+
+.admin-flag.is-draft {
+	color: var(--poem);
+}
+
+.admin-flag.is-live {
+	color: var(--muted);
 }
 
 .admin-post-date {

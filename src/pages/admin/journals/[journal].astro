@@ -71,7 +71,9 @@ function parseDay(value: string) {
 							>
 								{post.title}
 							</a>
-							{post.draft && <span class="admin-flag">draft</span>}
+							<span class:list={['admin-flag', post.draft ? 'is-draft' : 'is-live']}>
+								{post.draft ? 'draft' : 'live'}
+							</span>
 							<span class="admin-post-date">{parseDay(post.pubDate)}</span>
 						</li>
 					))}
