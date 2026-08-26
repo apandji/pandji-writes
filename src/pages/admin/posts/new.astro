@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import MarkdownEditor from '../../../components/MarkdownEditor.astro';
+import Button from '../../../components/Button.astro';
 import { getPostForAdmin, listJournalsForAdmin } from '../../../lib/github';
 
 let journals: { id: string; title: string }[] = [];
@@ -106,8 +107,8 @@ const crumbLabel = existing?.title
 
 				<div class="write-actions">
 					<div class="write-actions-buttons">
-						<button type="submit" data-set-intent="draft">save draft</button>
-						<button type="submit" data-set-intent="publish">publish</button>
+						<Button data-set-intent="draft">save draft</Button>
+						<Button data-set-intent="publish">publish</Button>
 					</div>
 					<p class="admin-hint">draft stays private · publish waits for a rebuild</p>
 				</div>

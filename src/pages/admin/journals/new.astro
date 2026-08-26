@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Button from '../../../components/Button.astro';
 import { journalMarks } from '../../../lib/site';
 
 const error = Astro.url.searchParams.get('error');
@@ -37,7 +38,7 @@ const error = Astro.url.searchParams.get('error');
 		</fieldset>
 
 		<div class="write-actions">
-			<button type="submit">save</button>
+			<Button>save</Button>
 			<p class="admin-hint">a room on the homepage. you can write in it next.</p>
 		</div>
 		{error && <p class="admin-error">{error === 'title' ? 'needs a title.' : error}</p>}

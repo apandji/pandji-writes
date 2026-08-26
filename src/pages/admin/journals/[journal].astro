@@ -4,6 +4,7 @@ export const prerender = false;
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { formatDate, journalMark } from '../../../lib/site';
 import { listJournalsForAdmin, listPostsForAdmin } from '../../../lib/github';
+import Button from '../../../components/Button.astro';
 
 const { journal: journalId } = Astro.params;
 const saved = Astro.url.searchParams.get('saved');
@@ -74,9 +75,7 @@ function parseDay(value: string) {
 			)
 		}
 		<p class="admin-write-row">
-			<a class="admin-write-btn" href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}>
-				write
-			</a>
+			<Button href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}>write</Button>
 		</p>
 	</section>
 </AdminLayout>

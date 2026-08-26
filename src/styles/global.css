@@ -610,12 +610,37 @@ body.is-admin::before {
 
 .write-actions-buttons {
 	display: flex;
-	align-items: baseline;
-	gap: 1.15rem;
+	align-items: center;
+	gap: 0.75rem;
 }
 
-.admin-form button[data-set-intent='draft'] {
+.btn {
+	appearance: none;
+	display: inline-block;
+	margin: 0;
+	padding: 0.4rem 0.95rem;
+	border: 1px solid var(--text);
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.btn:hover,
+.btn:focus-visible {
+	background: var(--text);
+	color: var(--bg);
+	text-decoration: none;
+}
+
+.btn:disabled {
+	border-color: var(--rule);
+	background: transparent;
 	color: var(--muted);
+	cursor: wait;
 }
 
 .admin-form label,
@@ -667,29 +692,6 @@ body.is-admin::before {
 	line-height: 1.75;
 	resize: vertical;
 	border-radius: 0;
-}
-
-.admin-form button[type='submit'] {
-	appearance: none;
-	justify-self: start;
-	margin: 0;
-	padding: 0.45rem 0.95rem;
-	border: 1px solid var(--rule);
-	background: transparent;
-	color: var(--text);
-	font: inherit;
-	font-size: 0.875rem;
-	cursor: pointer;
-	transition: border-color 120ms ease, color 120ms ease;
-}
-
-.admin-form button[type='submit']:hover:not(:disabled) {
-	border-color: var(--text);
-}
-
-.admin-form button[type='submit']:disabled {
-	color: var(--muted);
-	cursor: wait;
 }
 
 .md-editor {
@@ -904,21 +906,6 @@ body.is-admin::before {
 
 .admin-write-row {
 	margin: 1.35rem 0 0;
-}
-
-.admin-write-btn {
-	display: inline-block;
-	padding: 0.4rem 0.95rem;
-	border: 1px solid var(--text);
-	color: var(--text);
-	font-size: 0.875rem;
-	line-height: 1.4;
-}
-
-.admin-write-btn:hover {
-	background: var(--text);
-	color: var(--bg);
-	text-decoration: none;
 }
 
 .mark-picker {
