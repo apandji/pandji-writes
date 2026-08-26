@@ -21,23 +21,23 @@ html[data-theme='dark'] {
 
 /* Cool gray ground, calm black — like a reader screen */
 html[data-theme='e-ink'] {
-	--bg: #e4e4e0;
-	--text: #1f1f1c;
-	--muted: #6c6c68;
-	--soft: #9a9a95;
-	--rule: #cecec9;
-	--code-bg: #d8d8d3;
+	--bg: #d4d4ce;
+	--text: #181816;
+	--muted: #5e5e5a;
+	--soft: #8a8a84;
+	--rule: #bcbcb6;
+	--code-bg: #c8c8c2;
 	color-scheme: light;
 }
 
 /* Washi paper + sumi ink — warm ground, deep brush black */
 html[data-theme='sumi'] {
-	--bg: #f1ebe0;
-	--text: #1a1712;
-	--muted: #7a7366;
-	--soft: #a69e8e;
-	--rule: #ddd4c4;
-	--code-bg: #e7dfd0;
+	--bg: #efe6d4;
+	--text: #14110c;
+	--muted: #6f6758;
+	--soft: #9a917e;
+	--rule: #d6cbb4;
+	--code-bg: #e4d9c3;
 	color-scheme: light;
 }
 
