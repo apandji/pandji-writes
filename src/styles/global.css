@@ -1,4 +1,5 @@
-:root {
+:root,
+html[data-theme='light'] {
 	--bg: #f2f1ef;
 	--text: #3d3c38;
 	--muted: #8a8984;
@@ -16,6 +17,28 @@ html[data-theme='dark'] {
 	--rule: #2c2c29;
 	--code-bg: #1f1f1c;
 	color-scheme: dark;
+}
+
+/* Cool gray ground, calm black — like a reader screen */
+html[data-theme='e-ink'] {
+	--bg: #e4e4e0;
+	--text: #1f1f1c;
+	--muted: #6c6c68;
+	--soft: #9a9a95;
+	--rule: #cecec9;
+	--code-bg: #d8d8d3;
+	color-scheme: light;
+}
+
+/* Washi paper + sumi ink — warm ground, deep brush black */
+html[data-theme='sumi'] {
+	--bg: #f1ebe0;
+	--text: #1a1712;
+	--muted: #7a7366;
+	--soft: #a69e8e;
+	--rule: #ddd4c4;
+	--code-bg: #e7dfd0;
+	color-scheme: light;
 }
 
 *,
