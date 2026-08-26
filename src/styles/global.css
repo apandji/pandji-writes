@@ -614,6 +614,7 @@ html[data-theme='dark'] .prose pre.astro-code span {
 .md-editor {
 	display: grid;
 	gap: 0;
+	position: relative;
 	border: 1px solid var(--rule);
 	background: color-mix(in srgb, var(--bg) 92%, var(--text) 3%);
 }
@@ -717,6 +718,107 @@ html[data-theme='dark'] .prose pre.astro-code span {
 .md-status-hint {
 	color: var(--poem);
 	font-style: italic;
+}
+
+.md-slash {
+	position: absolute;
+	left: 1rem;
+	top: 4.5rem;
+	z-index: 5;
+	min-width: 14rem;
+	max-width: min(20rem, calc(100% - 2rem));
+	margin: 0;
+	padding: 0.35rem 0;
+	list-style: none;
+	border: 1px solid var(--rule);
+	background: var(--bg);
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.md-slash li {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.4rem 0.75rem;
+	color: var(--text);
+	font-size: 0.8125rem;
+	cursor: pointer;
+}
+
+.md-slash li.is-active,
+.md-slash li:hover {
+	background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.md-slash-hint {
+	color: var(--muted);
+	font-size: 0.75rem;
+}
+
+.index-write {
+	margin: 1.4rem 0 0;
+	font-size: 0.8125rem;
+	color: var(--muted);
+}
+
+.index-write a:hover {
+	color: var(--text);
+}
+
+.empty-invite {
+	display: grid;
+	gap: 1rem;
+}
+
+.empty-cta {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--muted);
+}
+
+.empty-cta a {
+	color: var(--text);
+}
+
+.admin-banner {
+	display: grid;
+	gap: 0.45rem;
+	margin-bottom: 0.5rem;
+}
+
+.admin-follow {
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.45rem 0.65rem;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.admin-draft {
+	margin: 0 0 0.25rem;
+	color: var(--muted);
+	font-size: 0.875rem;
+}
+
+.admin-draft a {
+	color: var(--text);
+}
+
+.admin-journal-name {
+	flex: 1;
+	min-width: 0;
+}
+
+.admin-journal-write {
+	flex: none;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.admin-journal-write:hover {
+	color: var(--text);
 }
 
 .mark-picker {

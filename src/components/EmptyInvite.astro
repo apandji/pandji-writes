@@ -1,0 +1,26 @@
+---
+import { poems } from '../lib/poems';
+
+interface Props {
+	journalId: string;
+	label?: string;
+}
+
+const { journalId, label = 'write the first note' } = Astro.props;
+const writeHref = `/admin/posts/new?journal=${encodeURIComponent(journalId)}`;
+---
+
+<div class="empty-invite">
+	<p class="empty-poem" data-empty-poem></p>
+	<p class="empty-cta">
+		<a href={writeHref}>{label}</a>
+	</p>
+</div>
+
+<script is:inline define:vars={{ poems }}>
+	const root = document.currentScript?.previousElementSibling;
+	const poem = root instanceof HTMLElement ? root.querySelector('[data-empty-poem]') : null;
+	if (poem && poems.length > 0) {
+		poem.textContent = poems[Math.floor(Math.random() * poems.length)];
+	}
+</script>
