@@ -5,9 +5,10 @@ import '../styles/global.css';
 
 interface Props {
 	title?: string;
+	wide?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, wide = false } = Astro.props;
 const pageTitle = title ? `${title} — ${site.name}` : `admin — ${site.name}`;
 ---
 
@@ -36,7 +37,7 @@ const pageTitle = title ? `${title} — ${site.name}` : `admin — ${site.name}`
 		</script>
 	</head>
 	<body>
-		<div class="wrap">
+		<div class:list={[wide ? 'wrap wrap--wide' : 'wrap']}>
 			<header class="site-header">
 				<a class="site-title" href="/">{site.name}</a>
 				<nav class="admin-nav">

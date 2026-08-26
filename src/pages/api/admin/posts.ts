@@ -70,7 +70,9 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 		});
 
 		await commitFiles(files, `Add post: ${title}`);
-		return redirect('/admin?saved=post');
+		return redirect(
+			`/admin?saved=post&journal=${encodeURIComponent(journal)}&post=${encodeURIComponent(slug)}`,
+		);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'save failed';
 		return redirect(`/admin/posts/new?error=${encodeURIComponent(message)}`);

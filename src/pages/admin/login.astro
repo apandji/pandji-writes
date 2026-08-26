@@ -25,17 +25,21 @@ if (Astro.request.method === 'POST') {
 ---
 
 <Layout title="admin" noindex>
-	<form class="admin-form" method="post">
-		<p class="admin-kicker">admin</p>
+	<form class="admin-form admin-form--login" method="post">
+		<header class="write-header">
+			<p class="admin-kicker">admin</p>
+			{error && <p class="admin-error">{error}</p>}
+		</header>
 		<label>
 			<span>username</span>
-			<input type="text" name="username" autocomplete="username" required />
+			<input type="text" name="username" autocomplete="username" required autofocus />
 		</label>
 		<label>
 			<span>password</span>
 			<input type="password" name="password" autocomplete="current-password" required />
 		</label>
-		<button type="submit">enter</button>
-		{error && <p class="admin-error">{error}</p>}
+		<div class="write-actions">
+			<button type="submit">enter</button>
+		</div>
 	</form>
 </Layout>

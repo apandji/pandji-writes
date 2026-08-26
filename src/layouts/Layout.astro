@@ -50,7 +50,6 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 			<main class:list={['page', frame === 'journal' && 'page--journal']}>
 				<slot />
 			</main>
-			{frame === 'home' && <footer class="site-footer">{site.author}</footer>}
 		</div>
 		<script>
 			const button = document.querySelector('[data-theme-toggle]');

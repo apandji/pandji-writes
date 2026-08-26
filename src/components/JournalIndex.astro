@@ -2,10 +2,12 @@
 interface Props {
 	mark: string;
 	journalTitle: string;
+	journalId: string;
 	posts: { id: string; title: string }[];
 }
 
-const { mark, journalTitle, posts } = Astro.props;
+const { mark, journalTitle, journalId, posts } = Astro.props;
+const writeHref = `/admin/posts/new?journal=${encodeURIComponent(journalId)}`;
 ---
 
 <nav class="index" aria-label="Articles">
@@ -26,6 +28,9 @@ const { mark, journalTitle, posts } = Astro.props;
 			</ol>
 		)
 	}
+	<p class="index-write">
+		<a href={writeHref}>write</a>
+	</p>
 </nav>
 
 <script>

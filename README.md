@@ -6,7 +6,9 @@ A small static journal, built with [Astro](https://astro.build) and Markdown. Th
 
 Go to `/admin`. Sign in with the username and password stored in environment variables. Saving a journal or post commits to GitHub; Vercel rebuilds the live site.
 
-Images dropped into a post are stored in `public/uploads/`.
+The post editor has headings (H1–H3), bold/italic, bulleted and numbered lists, quotes, code, links, dividers, Mermaid diagrams, and preview. Drafts auto-save in the browser; ⌘/Ctrl+Enter saves.
+
+Images are inline only — use the toolbar **image** button, or paste/drop into the body. Files land in `public/uploads/`.
 
 You can still write Markdown by hand in `src/content/` if you prefer.
 
