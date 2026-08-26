@@ -121,7 +121,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
 		if (isDraft) {
 			return redirect(
-				`/admin/drafts?saved=draft&clear=${encodeURIComponent(clearKey)}`,
+				`/admin/journals/${encodeURIComponent(journal)}?saved=draft&clear=${encodeURIComponent(clearKey)}`,
 			);
 		}
 

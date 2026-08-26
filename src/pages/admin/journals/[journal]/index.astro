@@ -37,6 +37,13 @@ function parseDay(value: string) {
 	]}
 >
 	{
+		saved === 'draft' && (
+			<p class="admin-note" data-clear-draft={clearDraftKey || 'post-draft:new'}>
+				draft saved. it stays off the public site until you publish.
+			</p>
+		)
+	}
+	{
 		saved === 'post' && (
 			<div class="publish-ritual" data-publish-ritual data-clear-draft={clearDraftKey || 'post-draft:new'}>
 				<p class="publish-ritual-line">it is written, this is the way.</p>
@@ -103,9 +110,9 @@ function parseDay(value: string) {
 {saved === 'post' && <PublishDing />}
 
 <script>
-	const ritual = document.querySelector<HTMLElement>('[data-publish-ritual]');
-	if (ritual) {
-		const key = ritual.dataset.clearDraft;
+	const clearNode = document.querySelector<HTMLElement>('[data-clear-draft]');
+	if (clearNode) {
+		const key = clearNode.dataset.clearDraft;
 		try {
 			if (key) localStorage.removeItem(key);
 			localStorage.removeItem('post-draft');
@@ -113,6 +120,8 @@ function parseDay(value: string) {
 		} catch {
 			/* ignore */
 		}
+	}
+	if (document.querySelector('[data-publish-ritual]')) {
 		window.playPublishDing?.();
 	}
 </script>

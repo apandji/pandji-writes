@@ -460,24 +460,6 @@ body.is-admin::before {
 	z-index: 40;
 }
 
-.admin-crumbs {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: 0.4rem;
-	margin: -1.1rem 0 1.6rem;
-	color: var(--muted);
-	font-size: 0.8125rem;
-}
-
-.admin-crumbs a:hover {
-	color: var(--text);
-}
-
-.admin-crumbs-sep {
-	color: var(--soft);
-}
-
 .admin-kicker--row {
 	display: flex;
 	align-items: baseline;
@@ -1122,8 +1104,7 @@ body.is-admin::before {
 	color: var(--soft);
 }
 
-body.is-write-focus .site-header,
-body.is-write-focus .admin-crumbs {
+body.is-write-focus .site-header {
 	opacity: 0;
 	pointer-events: none;
 	height: 0;

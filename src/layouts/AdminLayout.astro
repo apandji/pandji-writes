@@ -13,9 +13,8 @@ interface Props {
 	crumbs?: AdminCrumb[];
 }
 
-const adminName = 'pandji admins.';
 const { title, wide = false, crumbs = [] } = Astro.props;
-const pageTitle = title ? `${title} — ${adminName}` : adminName;
+const pageTitle = title ?? 'admin';
 ---
 
 <!doctype html>
@@ -45,9 +44,39 @@ const pageTitle = title ? `${title} — ${adminName}` : adminName;
 	<body class="is-admin">
 		<div class:list={[wide ? 'wrap wrap--wide' : 'wrap']}>
 			<header class="site-header">
-				<a class="site-title" href="/admin">{adminName}</a>
+				{
+					crumbs.length > 0 ? (
+						<nav class="site-crumbs" aria-label="breadcrumb">
+							{crumbs.map((crumb, index) => (
+								<>
+									{index > 0 && (
+										<span class="site-crumbs-sep" aria-hidden="true">
+											/
+										</span>
+									)}
+									{index === 0 ? (
+										<a class="site-title" href={crumb.href || '/admin'}>
+											{crumb.label}
+										</a>
+									) : crumb.href ? (
+										<a class="site-crumb" href={crumb.href}>
+											{crumb.label}
+										</a>
+									) : (
+										<span class="site-crumb" aria-current="page">
+											{crumb.label}
+										</span>
+									)}
+								</>
+							))}
+						</nav>
+					) : (
+						<a class="site-title" href="/admin">
+							admin
+						</a>
+					)
+				}
 				<nav class="admin-nav">
-					<a href="/admin/drafts">drafts</a>
 					<a href="/admin/history">history</a>
 					<form method="post" action="/api/admin/logout">
 						<button class="theme-toggle" type="submit">log out</button>
@@ -55,26 +84,6 @@ const pageTitle = title ? `${title} — ${adminName}` : adminName;
 					<button class="theme-toggle" type="button" data-theme-toggle>dark</button>
 				</nav>
 			</header>
-			{
-				crumbs.length > 0 && (
-					<nav class="admin-crumbs" aria-label="breadcrumb">
-						{crumbs.map((crumb, index) => (
-							<>
-								{index > 0 && (
-									<span class="admin-crumbs-sep" aria-hidden="true">
-										/
-									</span>
-								)}
-								{crumb.href ? (
-									<a href={crumb.href}>{crumb.label}</a>
-								) : (
-									<span aria-current="page">{crumb.label}</span>
-								)}
-							</>
-						))}
-					</nav>
-				)
-			}
 			<main class="page">
 				<slot />
 			</main>
