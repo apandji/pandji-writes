@@ -2,6 +2,8 @@
 
 Use this site’s stack as the foundation for a personal portfolio — not a second product, and not the multi-tenant `{name} writes.` idea in `the-future-product.md`.
 
+Map of forks and other jumping points: `where-this-could-go.md`.
+
 The portfolio is still one personal Astro site, Markdown on disk, admin that commits to GitHub, Vercel rebuild. What changes is the **shape of the home** and a small set of **content types** so writings, projects, and later kinds of work can live together without turning the journal into a CMS.
 
 Do not build this yet. This is a note for later.
@@ -59,6 +61,34 @@ flowchart TB
 
 One site. Several **types**. Each type has its own collection (or a clear discriminator), schema, routes, and default layout. Do not force projects through the journal feed schema.
 
+### How pieces connect
+
+Three strengths. Do not collapse them into one tagging system.
+
+| Layer | Answers | Strength | Examples |
+| --- | --- | --- | --- |
+| **Rooms** | Where does this live? | Hard | Journal membership; type/collection (`writings`, `work`) |
+| **Metadata** | What is true about it? | Soft | `year`, `status`, `summary`, sparse `motifs` |
+| **Fuzzy links** | What else breathes near it? | Serendipity | `kin`, motif overlap, later wikilinks/backlinks |
+
+```text
+rooms / types     ← hard membership (you decide)
+metadata          ← soft facets (facts for layout & affinity)
+kins / echoes     ← fuzzy edges (serendipity)
+```
+
+**Rooms** are the only required organization and the main navigation. A post lives in one journal. A project lives in `work`, not jammed into a journal with extra fields. Optional later: soft adjacency (`alongside: spatial-ai-apps`) without feed membership.
+
+**Metadata** is YAML facts the layout needs — not a filing cabinet. Prefer a prose `lede` over `client` / `medium` fields unless you actually display them. Call affinity labels **motifs** (tiny house lexicon, aim ≤12 sitewide), not tags. No motif index or tag-cloud nav in v1.
+
+**Fuzzy connections** surface at the *end of a piece* (Nearby / Kin / Echoes), not as a browsing mode:
+
+1. **`kin`** — authored soft edges (`grew-from`, `talks-to`, `echo`, or plain slug list)
+2. **Motif overlap** — build-time “Also” when kin is empty (shared motifs + nearby year)
+3. **Wikilinks + backlinks** — later, when manual kin gets tedious
+
+Rule: if a connection is load-bearing, put it in a room or in `kin`. If it’s a hunch, let motifs or backlinks invent it.
+
 ### Writings (already here)
 
 Keep journals and posts as they are.
@@ -69,6 +99,15 @@ Keep journals and posts as they are.
 | Post | Dated Markdown entry in a journal |
 
 Writings remain chronological. Marks, left index, and the feed stay.
+
+Optional later on posts:
+
+```yaml
+motifs: [unfinished, touch]   # sparse; house lexicon
+kin:
+  - id: spatial-ai-sketchbook
+    as: talks-to              # or a plain slug list
+```
 
 ### Projects (first new type)
 
@@ -89,7 +128,11 @@ links:
     href: https://…
   - label: Repo
     href: https://…
-tags: [interaction, hardware]   # optional, keep sparse
+motifs: [spatial, touch]        # optional, keep sparse — not nav
+alongside: spatial-ai-apps      # optional soft room adjacency
+kin:
+  - id: on-unfinished-interfaces
+    as: grew-from
 order: 1                        # optional manual sort
 draft: false
 ---
@@ -103,7 +146,7 @@ Public routes (illustrative):
 - `/work/{slug}` — project page
 - Writings stay under `/journals/…`
 
-Projects may link to related journal posts later (`relatedPosts: […]`). That is optional glue, not a requirement for v1.
+`kin` (and later motif “Also”) replaces a dedicated `relatedPosts` field. Optional glue — not a requirement for v1.
 
 ### Other types (deliberately open)
 
@@ -195,12 +238,18 @@ Done when: a project can be published without opening the repo.
 
 ### 4 — Cross-links and polish
 
-- Optional related posts on projects (and vice versa)
+- Optional `kin` on projects and posts; quiet Nearby at end of page
 - Covers and responsive images good enough for still work
 - RSS for writings first; optional `/work/rss.xml` later
 - 404 and empty states that match each type
 
-### 5 — Next types (only when needed)
+### 5 — Motifs and fuzzier links (only when kin is tedious)
+
+- Tiny shared `motifs` vocabulary; build-time “Also” from overlap
+- Optional wikilinks in Markdown + backlinks (“Echoes”)
+- Still no tag taxonomy as navigation
+
+### 6 — Next types (only when needed)
 
 Add one type at a time using the rule above. Prefer shipping a real Talk or Making page over abstract “custom content type” infrastructure.
 
@@ -216,9 +265,12 @@ Add one type at a time using the rule above. Prefer shipping a real Talk or Maki
 - Hosted `{name} writes.` product (`the-future-product.md`)
 - Comments, likes, global discovery feed
 - Heavy theming, page builders, drag-and-drop layouts
-- Tag taxonomies as navigation
+- Tag taxonomies as navigation (motifs are not a public index)
+- Embeddings / recommendation engines for “related”
 - Custom domains per section
 - Database-backed CMS for solo use
+
+Other jumping points (starter template, desk-as-craft, garden layer, etc.): `where-this-could-go.md`.
 
 ## What would break the spell
 
@@ -228,6 +280,7 @@ Add one type at a time using the rule above. Prefer shipping a real Talk or Maki
 - A generic “content item” table that erases type-specific reading
 - Making GitHub setup the visitor’s problem (it is only the author’s publish path)
 - Building the multi-tenant product under the guise of a portfolio
+- Letting fuzzy links (tags, motifs, kin) become the sitemap
 
 ## First slice, when building starts
 

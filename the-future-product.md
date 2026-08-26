@@ -4,6 +4,8 @@ A hosted `{name} writes.` product.
 
 The hook is claiming a name and immediately getting a quiet site: **pandji writes.**, **april writes.**, **bradley writes.** Keep the reading and writing feel of this journal. Do not use GitHub as the CMS for other people.
 
+Map of forks and other jumping points: `where-this-could-go.md`. Personal portfolio path: `portfolio-roadmap.md`.
+
 Do not build this yet. This is a note for later.
 
 ## Shape
@@ -52,6 +54,20 @@ A self-hosted starter is a fine later gift for people who want the files. It is 
 
 **Own the words.** Export Markdown and images from day one. That is the honest version of “lightweight and open.” People will trust it more if they can leave.
 
+## Connection model (keep thin)
+
+Same three layers as the portfolio thinking — but the product stays on the hard layer first.
+
+| Layer | In the product? | Notes |
+| --- | --- | --- |
+| **Rooms (journals)** | Yes — core | Membership and navigation. Do not replace with tags. |
+| **Metadata** | Minimal | Title, date, draft, journal. No client/medium/CMS field farm. |
+| **Fuzzy links** | Deliberately later | `kin`, motifs, backlinks only after people are actually writing |
+
+For v1, connection *is* the journal room and the scrollable feed. Serendipity across a stranger’s tiny corpus is a distraction; serendipity across *your* portfolio corpus can wait in `portfolio-roadmap.md`.
+
+If fuzzy links ever ship here: end-of-post Nearby only, authored `kin` before any computed “Also,” never a public tag directory.
+
 ## Deliberately later
 
 - Custom domains
@@ -59,13 +75,17 @@ A self-hosted starter is a fine later gift for people who want the files. It is 
 - SEO kits, newsletters, analytics
 - Themes beyond light/dark
 - Collaboration
+- Portfolio-style content types (projects, talks) — that is the personal fork, not the claim-a-name v1
+- Motif taxonomies, tag clouds, recommendation engines
 - Changing the claimed name (a display-name tweak is fine; keep the URL stable)
 
 A public directory of writers can wait until discovery is wanted. For friends, send a link.
 
+Self-hosted starter, desk-as-craft, export-as-trust, and other jumping points: `where-this-could-go.md`.
+
 ## What would break the spell
 
-Making them connect GitHub. Making them pick a plan before a name. A settings page with twenty fields. A feed of other people’s posts on their homepage. Rebuilding the site on every save.
+Making them connect GitHub. Making them pick a plan before a name. A settings page with twenty fields. A feed of other people’s posts on their homepage. Rebuilding the site on every save. Shipping a portfolio CMS to people who only wanted a quiet place to write.
 
 ## First slice, if this is ever built
 
