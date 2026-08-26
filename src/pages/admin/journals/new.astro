@@ -8,12 +8,17 @@ const error = Astro.url.searchParams.get('error');
 ---
 
 <AdminLayout title="new journal">
-	<form class="admin-form" method="post" action="/api/admin/journals">
-		<p class="admin-kicker">new journal</p>
+	<form class="admin-form admin-form--journal" method="post" action="/api/admin/journals">
+		<header class="write-header">
+			<p class="admin-kicker">new journal</p>
+			{error && <p class="admin-error">{error === 'title' ? 'needs a title.' : error}</p>}
+		</header>
+
 		<label>
 			<span>title</span>
-			<input type="text" name="title" required maxlength="80" />
+			<input type="text" name="title" required maxlength="80" placeholder="series name" autofocus />
 		</label>
+
 		<fieldset class="mark-picker">
 			<legend>symbol</legend>
 			<label class="mark-choice">
@@ -29,7 +34,10 @@ const error = Astro.url.searchParams.get('error');
 				))
 			}
 		</fieldset>
-		<button type="submit">save</button>
-		{error && <p class="admin-error">{error === 'title' ? 'needs a title.' : error}</p>}
+
+		<div class="write-actions">
+			<button type="submit">save</button>
+			<p class="admin-hint">shows on the homepage with its own feed.</p>
+		</div>
 	</form>
 </AdminLayout>

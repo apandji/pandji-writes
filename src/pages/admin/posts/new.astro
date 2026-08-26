@@ -3,13 +3,13 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import MarkdownEditor from '../../../components/MarkdownEditor.astro';
-import { listJournalsFromRepo } from '../../../lib/github';
+import { listJournalsForAdmin } from '../../../lib/github';
 
 let journals: { id: string; title: string }[] = [];
 let loadError = '';
 
 try {
-	journals = await listJournalsFromRepo();
+	journals = await listJournalsForAdmin();
 } catch (error) {
 	loadError = error instanceof Error ? error.message : 'could not read journals.';
 }
@@ -28,43 +28,47 @@ const errorText =
 					: error;
 ---
 
-<AdminLayout title="new post">
+<AdminLayout title="new post" wide>
 	{
 		loadError ? (
 			<p class="admin-error">{loadError}</p>
 		) : journals.length === 0 ? (
 			<p class="empty-poem">make a journal first.</p>
 		) : (
-			<form class="admin-form" method="post" action="/api/admin/posts" enctype="multipart/form-data">
-				<p class="admin-kicker">new post</p>
-				<label>
-					<span>journal</span>
-					<select name="journal" required>
-						{journals.map((journal) => (
-							<option value={journal.id}>{journal.title}</option>
-						))}
-					</select>
-				</label>
-				<label>
-					<span>title</span>
-					<input type="text" name="title" required maxlength="120" />
-				</label>
-				<label>
-					<span>date</span>
-					<input type="date" name="pubDate" value={today} required />
-				</label>
-				<div class="admin-field">
-					<span>body</span>
+			<form class="admin-form admin-form--write" method="post" action="/api/admin/posts" enctype="multipart/form-data">
+				<header class="write-header">
+					<p class="admin-kicker">new post</p>
+					{errorText && <p class="admin-error">{errorText}</p>}
+				</header>
+
+				<div class="write-meta">
+					<label>
+						<span>journal</span>
+						<select name="journal" required>
+							{journals.map((journal) => (
+								<option value={journal.id}>{journal.title}</option>
+							))}
+						</select>
+					</label>
+					<label class="write-title">
+						<span>title</span>
+						<input type="text" name="title" required maxlength="120" placeholder="what is this about?" />
+					</label>
+					<label>
+						<span>date</span>
+						<input type="date" name="pubDate" value={today} required />
+					</label>
+				</div>
+
+				<div class="admin-field write-body">
+					<span class="write-body-label">body</span>
 					<MarkdownEditor />
 				</div>
-				<div class="dropzone" data-dropzone>
-					<p>drop images here</p>
-					<input type="file" name="images" accept="image/jpeg,image/png,image/webp,image/gif" multiple />
+
+				<div class="write-actions">
+					<button type="submit">save</button>
+					<p class="admin-hint">images go inline via the toolbar, paste, or drop into the body.</p>
 				</div>
-				<ul class="drop-list" data-drop-list></ul>
-				<p class="admin-hint">jpeg, png, webp, gif. under 1 MB each.</p>
-				<button type="submit">save</button>
-				{errorText && <p class="admin-error">{errorText}</p>}
 			</form>
 		)
 	}

@@ -3,14 +3,14 @@ export const prerender = false;
 
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { journalMark } from '../../lib/site';
-import { listJournalsFromRepo } from '../../lib/github';
+import { listJournalsForAdmin } from '../../lib/github';
 
 const saved = Astro.url.searchParams.get('saved');
 let journals: { id: string; title: string; emoji?: string }[] = [];
 let loadError = '';
 
 try {
-	journals = await listJournalsFromRepo();
+	journals = await listJournalsForAdmin();
 } catch (error) {
 	loadError = error instanceof Error ? error.message : 'could not read the repo.';
 }
@@ -28,7 +28,13 @@ const note =
 	{loadError && <p class="admin-error">{loadError}</p>}
 
 	<section class="admin-section">
-		<p class="admin-kicker">journals</p>
+		<header class="write-header">
+			<p class="admin-kicker">journals</p>
+			<p class="admin-actions admin-actions--inline">
+				<a href="/admin/journals/new">new journal</a>
+				<a class="admin-primary" href="/admin/posts/new">write</a>
+			</p>
+		</header>
 		{
 			journals.length === 0 && !loadError ? (
 				<p class="empty-poem">nothing here yet.</p>
@@ -45,9 +51,5 @@ const note =
 				</ul>
 			)
 		}
-		<p class="admin-actions">
-			<a href="/admin/journals/new">new journal</a>
-			<a href="/admin/posts/new">new post</a>
-		</p>
 	</section>
 </AdminLayout>

@@ -65,16 +65,16 @@ a:hover {
 	margin-inline: auto;
 }
 
+.wrap--wide {
+	width: min(48rem, calc(100% - 3rem));
+}
+
 .shell {
 	width: min(64rem, calc(100% - 3rem));
 }
 
-.site-header,
-.site-footer {
-	padding-block: 2.5rem;
-}
-
 .site-header {
+	padding-block: 2.5rem;
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
@@ -85,11 +85,6 @@ a:hover {
 	font-size: 0.9375rem;
 	font-weight: 400;
 	letter-spacing: 0.04em;
-}
-
-.site-footer {
-	color: var(--muted);
-	font-size: 0.875rem;
 }
 
 .theme-toggle {
@@ -292,14 +287,26 @@ a:hover {
 	margin-top: 0;
 }
 
+.prose h1,
 .prose h2,
 .prose h3 {
 	margin: 2.6rem 0 0.8rem;
-	font-size: 1.05rem;
 	font-weight: 300;
 	font-style: italic;
 	letter-spacing: 0.02em;
 	line-height: 1.45;
+}
+
+.prose h1 {
+	font-size: 1.35rem;
+}
+
+.prose h2 {
+	font-size: 1.12rem;
+}
+
+.prose h3 {
+	font-size: 1.05rem;
 }
 
 .prose p,
@@ -439,13 +446,23 @@ html[data-theme='dark'] .prose pre.astro-code span {
 }
 
 .admin-kicker {
-	margin: 0 0 1.2rem;
+	margin: 0;
 	color: var(--muted);
 	font-size: 0.8125rem;
 }
 
+.write-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
 .admin-section {
 	margin-top: 0.5rem;
+	display: grid;
+	gap: 1.5rem;
 }
 
 .admin-list {
@@ -468,14 +485,56 @@ html[data-theme='dark'] .prose pre.astro-code span {
 .admin-actions {
 	display: flex;
 	gap: 1.25rem;
-	margin: 2rem 0 0;
+	margin: 0;
 	color: var(--muted);
 	font-size: 0.875rem;
 }
 
+.admin-actions--inline {
+	margin: 0;
+}
+
+.admin-primary {
+	color: var(--text);
+}
+
 .admin-form {
 	display: grid;
-	gap: 1.35rem;
+	gap: 1.5rem;
+}
+
+.admin-form--login {
+	max-width: 22rem;
+	margin-top: 1rem;
+}
+
+.admin-form--journal {
+	max-width: 28rem;
+}
+
+.write-meta {
+	display: grid;
+	grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.6fr) auto;
+	gap: 1rem 1.25rem;
+	align-items: end;
+}
+
+.write-body {
+	gap: 0.65rem;
+}
+
+.write-body-label {
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.write-actions {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+	padding-top: 0.25rem;
 }
 
 .admin-form label,
@@ -487,7 +546,7 @@ html[data-theme='dark'] .prose pre.astro-code span {
 .admin-form label,
 .admin-field {
 	display: grid;
-	gap: 0.4rem;
+	gap: 0.45rem;
 }
 
 .admin-field {
@@ -502,66 +561,111 @@ html[data-theme='dark'] .prose pre.astro-code span {
 .admin-form textarea {
 	width: 100%;
 	margin: 0;
-	padding: 0.4rem 0 0.55rem;
+	padding: 0.55rem 0.15rem 0.6rem;
 	border: 0;
 	border-bottom: 1px solid var(--rule);
 	border-radius: 0;
 	background: transparent;
 	color: var(--text);
 	font: inherit;
+	transition: border-color 120ms ease;
 }
 
-.admin-form textarea {
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+	outline: none;
+	border-bottom-color: var(--text);
+}
+
+.admin-form textarea,
+.md-body {
 	border: 1px solid var(--rule);
-	padding: 0.9rem;
-	min-height: 16rem;
-	line-height: 1.7;
+	padding: 1rem 1.05rem;
+	min-height: 22rem;
+	line-height: 1.75;
 	resize: vertical;
+	border-radius: 0;
 }
 
 .admin-form button[type='submit'] {
 	appearance: none;
 	justify-self: start;
 	margin: 0;
-	padding: 0;
-	border: 0;
-	background: none;
-	color: var(--muted);
+	padding: 0.45rem 0.95rem;
+	border: 1px solid var(--rule);
+	background: transparent;
+	color: var(--text);
 	font: inherit;
+	font-size: 0.875rem;
 	cursor: pointer;
+	transition: border-color 120ms ease, color 120ms ease;
 }
 
-.admin-form button[type='submit']:hover {
-	color: var(--text);
+.admin-form button[type='submit']:hover:not(:disabled) {
+	border-color: var(--text);
+}
+
+.admin-form button[type='submit']:disabled {
+	color: var(--muted);
+	cursor: wait;
 }
 
 .md-editor {
 	display: grid;
-	gap: 0.55rem;
+	gap: 0;
+	border: 1px solid var(--rule);
+	background: color-mix(in srgb, var(--bg) 92%, var(--text) 3%);
 }
 
 .md-toolbar {
+	position: sticky;
+	top: 0;
+	z-index: 2;
 	display: flex;
 	flex-wrap: wrap;
-	align-items: baseline;
-	gap: 0.65rem 0.9rem;
+	align-items: center;
+	gap: 0.35rem 0.15rem;
+	padding: 0.55rem 0.65rem;
+	border-bottom: 1px solid var(--rule);
+	background: var(--bg);
+}
+
+.md-group {
+	display: flex;
+	align-items: center;
+	gap: 0.1rem;
+	padding-inline: 0.35rem;
+}
+
+.md-group + .md-group {
+	border-left: 1px solid var(--rule);
 }
 
 .md-toolbar button {
 	appearance: none;
 	margin: 0;
-	padding: 0;
+	padding: 0.3rem 0.45rem;
 	border: 0;
+	border-radius: 0;
 	background: none;
 	color: var(--muted);
 	font: inherit;
-	font-size: 0.8125rem;
+	font-size: 0.75rem;
+	letter-spacing: 0.02em;
 	cursor: pointer;
+	line-height: 1.2;
+}
+
+.md-toolbar button strong,
+.md-toolbar button em {
+	font-size: 0.8125rem;
 }
 
 .md-toolbar button:hover,
 .md-toolbar button:focus-visible {
 	color: var(--text);
+	background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 .md-toolbar [data-md-preview-toggle] {
@@ -569,13 +673,27 @@ html[data-theme='dark'] .prose pre.astro-code span {
 }
 
 .md-editor.is-over .md-body {
-	border-color: var(--text);
+	box-shadow: inset 0 0 0 1px var(--text);
+}
+
+.md-body {
+	width: 100%;
+	margin: 0;
+	border: 0 !important;
+	border-radius: 0;
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+	min-height: 24rem;
+}
+
+.md-body:focus {
+	outline: none;
 }
 
 .md-preview {
-	min-height: 16rem;
-	padding: 0.9rem;
-	border: 1px solid var(--rule);
+	min-height: 24rem;
+	padding: 1rem 1.05rem;
 	color: var(--text);
 	font-size: 1.0625rem;
 }
@@ -584,18 +702,38 @@ html[data-theme='dark'] .prose pre.astro-code span {
 	margin-top: 0;
 }
 
+.md-status {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	padding: 0.55rem 0.85rem;
+	border-top: 1px solid var(--rule);
+	color: var(--muted);
+	font-size: 0.75rem;
+}
+
+.md-status-hint {
+	color: var(--poem);
+	font-style: italic;
+}
+
 .mark-picker {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.55rem 1rem;
 	margin: 0;
-	padding: 0;
+	padding: 0.85rem 0 0;
 	border: 0;
+	border-top: 1px solid var(--rule);
 }
 
 .mark-picker legend {
 	padding: 0;
 	margin: 0 0 0.65rem;
+	float: left;
+	width: 100%;
 }
 
 .mark-choice {
@@ -616,42 +754,6 @@ html[data-theme='dark'] .prose pre.astro-code span {
 	accent-color: var(--text);
 }
 
-.dropzone {
-	position: relative;
-	padding: 1.4rem 1rem;
-	border: 1px dashed var(--rule);
-	color: var(--muted);
-	font-size: 0.875rem;
-	text-align: center;
-	cursor: pointer;
-}
-
-.dropzone.is-over {
-	border-color: var(--text);
-	color: var(--text);
-}
-
-.dropzone input[type='file'] {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	clip: rect(0 0 0 0);
-	border: 0;
-}
-
-.drop-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	color: var(--muted);
-	font-size: 0.8125rem;
-}
-
-.drop-list li + li {
-	margin-top: 0.25rem;
-}
-
 .admin-hint,
 .admin-error,
 .admin-note {
@@ -664,4 +766,14 @@ html[data-theme='dark'] .prose pre.astro-code span {
 
 .admin-error {
 	color: var(--muted);
+}
+
+@media (max-width: 720px) {
+	.write-meta {
+		grid-template-columns: 1fr;
+	}
+
+	.md-status-hint {
+		display: none;
+	}
 }

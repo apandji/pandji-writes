@@ -1,18 +1,58 @@
-<div class="md-editor" data-md-editor>
+---
+interface Props {
+	draftKey?: string;
+}
+
+const { draftKey = 'post-draft' } = Astro.props;
+---
+
+<div class="md-editor" data-md-editor data-draft-key={draftKey}>
 	<div class="md-toolbar" role="toolbar" aria-label="formatting">
-		<button type="button" data-md="bold">bold</button>
-		<button type="button" data-md="italic">italic</button>
-		<button type="button" data-md="heading">heading</button>
-		<button type="button" data-md="list">list</button>
-		<button type="button" data-md="quote">quote</button>
-		<button type="button" data-md="code">code</button>
-		<button type="button" data-md="link">link</button>
-		<button type="button" data-md="image">image</button>
-		<button type="button" data-md="diagram">diagram</button>
-		<button type="button" data-md="preview" data-md-preview-toggle>preview</button>
+		<div class="md-group" role="group" aria-label="headings">
+			<button type="button" data-md="h1" title="Heading 1">H1</button>
+			<button type="button" data-md="h2" title="Heading 2">H2</button>
+			<button type="button" data-md="h3" title="Heading 3">H3</button>
+		</div>
+		<div class="md-group" role="group" aria-label="emphasis">
+			<button type="button" data-md="bold" title="Bold (⌘B)"><strong>B</strong></button>
+			<button type="button" data-md="italic" title="Italic (⌘I)"><em>I</em></button>
+		</div>
+		<div class="md-group" role="group" aria-label="lists">
+			<button type="button" data-md="ul" title="Bulleted list">• list</button>
+			<button type="button" data-md="ol" title="Numbered list">1. list</button>
+			<button type="button" data-md="quote" title="Quote">quote</button>
+		</div>
+		<div class="md-group" role="group" aria-label="insert">
+			<button type="button" data-md="code" title="Code">code</button>
+			<button type="button" data-md="link" title="Link (⌘K)">link</button>
+			<button type="button" data-md="image" title="Inline image">image</button>
+			<button type="button" data-md="hr" title="Divider">—</button>
+			<button type="button" data-md="diagram" title="Mermaid diagram">diagram</button>
+		</div>
+		<button type="button" data-md="preview" data-md-preview-toggle title="Toggle preview">preview</button>
 	</div>
-	<textarea class="md-body" name="body" rows="16" required data-md-body></textarea>
+	<textarea
+		class="md-body"
+		name="body"
+		rows="22"
+		required
+		data-md-body
+		placeholder="Write here. Drop or paste images inline."
+	></textarea>
 	<div class="md-preview prose" hidden data-md-preview></div>
+	<input
+		type="file"
+		name="images"
+		accept="image/jpeg,image/png,image/webp,image/gif"
+		multiple
+		hidden
+		data-md-images
+	/>
+	<div class="md-status">
+		<span data-md-count>0 words</span>
+		<span class="md-status-hint">⌘/Ctrl + Enter to save · drafts auto-saved</span>
+		<span data-md-draft-note hidden>draft restored</span>
+	</div>
 </div>
 
 <script>
@@ -22,22 +62,27 @@
 	const textarea = editor?.querySelector<HTMLTextAreaElement>('[data-md-body]');
 	const preview = editor?.querySelector<HTMLElement>('[data-md-preview]');
 	const previewToggle = editor?.querySelector<HTMLButtonElement>('[data-md-preview-toggle]');
+	const input = editor?.querySelector<HTMLInputElement>('[data-md-images]');
+	const countEl = editor?.querySelector<HTMLElement>('[data-md-count]');
+	const draftNote = editor?.querySelector<HTMLElement>('[data-md-draft-note]');
 	const form = editor?.closest('form');
 	const title = form?.querySelector<HTMLInputElement>('input[name="title"]');
-	const zone = form?.querySelector<HTMLElement>('[data-dropzone]');
-	const input = form?.querySelector<HTMLInputElement>('input[name="images"]');
-	const list = form?.querySelector('[data-drop-list]');
+	const journal = form?.querySelector<HTMLSelectElement>('select[name="journal"]');
+	const pubDate = form?.querySelector<HTMLInputElement>('input[name="pubDate"]');
+	const draftKey = editor instanceof HTMLElement ? editor.dataset.draftKey || 'post-draft' : 'post-draft';
 
-	if (editor instanceof HTMLElement && textarea && preview && previewToggle) {
+	if (editor instanceof HTMLElement && textarea && preview && previewToggle && input) {
 		const surface = editor;
 		const field = textarea;
 		const pane = preview;
 		const toggle = previewToggle;
+		const fileInput = input;
 		const bag = new DataTransfer();
 		const blobs = new Map<string, string>();
 		let skipChange = false;
 		let showingPreview = false;
 		let pendingCaret: { start: number; end: number } | null = null;
+		let draftTimer = 0;
 
 		marked.setOptions({ gfm: true, breaks: false });
 
@@ -49,6 +94,77 @@
 					.replace(/^-+|-+$/g, '')
 					.slice(0, 40) || 'post'
 			);
+		}
+
+		function wordCount(text: string) {
+			const words = text.trim().match(/\S+/g);
+			return words ? words.length : 0;
+		}
+
+		function updateCount() {
+			if (!countEl) return;
+			const n = wordCount(field.value);
+			countEl.textContent = `${n} word${n === 1 ? '' : 's'}`;
+		}
+
+		function saveDraft() {
+			try {
+				localStorage.setItem(
+					draftKey,
+					JSON.stringify({
+						title: title?.value ?? '',
+						journal: journal?.value ?? '',
+						pubDate: pubDate?.value ?? '',
+						body: field.value,
+						savedAt: Date.now(),
+					}),
+				);
+			} catch {
+				/* ignore quota */
+			}
+		}
+
+		function scheduleDraft() {
+			window.clearTimeout(draftTimer);
+			draftTimer = window.setTimeout(saveDraft, 400);
+		}
+
+		function restoreDraft() {
+			try {
+				const raw = localStorage.getItem(draftKey);
+				if (!raw) return;
+				const draft = JSON.parse(raw) as {
+					title?: string;
+					journal?: string;
+					pubDate?: string;
+					body?: string;
+				};
+				if (!draft.body && !draft.title) return;
+				const empty =
+					!field.value.trim() &&
+					!(title?.value ?? '').trim();
+				if (!empty) return;
+				if (title && draft.title) title.value = draft.title;
+				if (journal && draft.journal) journal.value = draft.journal;
+				if (pubDate && draft.pubDate) pubDate.value = draft.pubDate;
+				if (draft.body) field.value = draft.body;
+				if (draftNote) {
+					draftNote.hidden = false;
+					window.setTimeout(() => {
+						if (draftNote) draftNote.hidden = true;
+					}, 2500);
+				}
+			} catch {
+				/* ignore */
+			}
+		}
+
+		function clearDraft() {
+			try {
+				localStorage.removeItem(draftKey);
+			} catch {
+				/* ignore */
+			}
 		}
 
 		function syncPreview() {
@@ -77,6 +193,8 @@
 			field.value = next;
 			field.setSelectionRange(selectStart, selectEnd);
 			field.focus();
+			updateCount();
+			scheduleDraft();
 			syncPreview();
 		}
 
@@ -89,7 +207,7 @@
 			apply(next, innerStart, innerStart + inner.length);
 		}
 
-		function prefixLines(prefix: string) {
+		function lineRange() {
 			const start = field.selectionStart;
 			const end = field.selectionEnd;
 			const value = field.value;
@@ -97,16 +215,41 @@
 			let to = value.indexOf('\n', end);
 			if (end > start && value[end - 1] === '\n') to = end - 1;
 			else if (to === -1) to = value.length;
+			return { from, to, block: value.slice(from, to) };
+		}
 
-			const block = value.slice(from, to);
-			const nextBlock = block
-				.split('\n')
-				.map((line) => (line.startsWith(prefix) ? line : `${prefix}${line}`))
-				.join('\n');
-
+		function setBlock(nextBlock: string, from: number, to: number) {
 			field.setRangeText(nextBlock, from, to, 'end');
 			field.focus();
+			updateCount();
+			scheduleDraft();
 			syncPreview();
+		}
+
+		function heading(level: number) {
+			const marks = '#'.repeat(level);
+			const { from, to, block } = lineRange();
+			const nextBlock = block
+				.split('\n')
+				.map((line) => {
+					const bare = line.replace(/^#{1,6}\s+/, '');
+					return `${marks} ${bare || 'heading'}`;
+				})
+				.join('\n');
+			setBlock(nextBlock, from, to);
+		}
+
+		function prefixLines(prefix: string, ordered = false) {
+			const { from, to, block } = lineRange();
+			const nextBlock = block
+				.split('\n')
+				.map((line, index) => {
+					const bare = line.replace(/^(?:[-*+]|\d+\.)\s+/, '').replace(/^>\s?/, '');
+					if (ordered) return `${index + 1}. ${bare}`;
+					return `${prefix}${bare}`;
+				})
+				.join('\n');
+			setBlock(nextBlock, from, to);
 		}
 
 		function insertAtCursor(text: string, selectOffset = text.length, selectLength = 0) {
@@ -126,6 +269,8 @@
 				field.setSelectionRange(inner, inner + selectLength);
 			}
 			field.focus();
+			updateCount();
+			scheduleDraft();
 			syncPreview();
 		}
 
@@ -146,14 +291,18 @@
 		}
 
 		function insertDiagram() {
-			const fence = '```mermaid\nflowchart LR\n  \n```';
-			insertAtCursor(fence, '```mermaid\nflowchart LR\n  '.length, 0);
+			const fence = '```mermaid\nflowchart LR\n  A --> B\n```';
+			insertAtCursor(fence, '```mermaid\nflowchart LR\n  '.length, 'A --> B'.length);
 		}
 
 		function insertCode() {
 			const selected = field.value.slice(field.selectionStart, field.selectionEnd);
 			if (selected.includes('\n')) wrapInline('```\n', '\n```', 'code');
 			else wrapInline('`', '`', 'code');
+		}
+
+		function insertHr() {
+			insertAtCursor('---\n', 0, 0);
 		}
 
 		function run(action: string) {
@@ -164,26 +313,19 @@
 			if (showingPreview) setPreview(false);
 			if (action === 'bold') wrapInline('**', '**', 'bold');
 			else if (action === 'italic') wrapInline('*', '*', 'italic');
-			else if (action === 'heading') prefixLines('## ');
-			else if (action === 'list') prefixLines('- ');
+			else if (action === 'h1') heading(1);
+			else if (action === 'h2') heading(2);
+			else if (action === 'h3') heading(3);
+			else if (action === 'ul') prefixLines('- ');
+			else if (action === 'ol') prefixLines('', true);
 			else if (action === 'quote') prefixLines('> ');
 			else if (action === 'code') insertCode();
 			else if (action === 'link') insertLink();
+			else if (action === 'hr') insertHr();
 			else if (action === 'image') {
 				pendingCaret = { start: field.selectionStart, end: field.selectionEnd };
-				input?.click();
-			}
-			else if (action === 'diagram') insertDiagram();
-		}
-
-		function renderList() {
-			if (!list) return;
-			list.replaceChildren();
-			for (const file of bag.files) {
-				const item = document.createElement('li');
-				item.textContent = file.name;
-				list.append(item);
-			}
+				fileInput.click();
+			} else if (action === 'diagram') insertDiagram();
 		}
 
 		function insertImages(files: File[]) {
@@ -196,7 +338,6 @@
 		}
 
 		function addFiles(files: FileList | File[]) {
-			if (!input) return;
 			const incoming = [...files].filter((file) => file.type.startsWith('image/'));
 			if (incoming.length === 0) return;
 
@@ -208,10 +349,9 @@
 			}
 
 			skipChange = true;
-			input.files = bag.files;
+			fileInput.files = bag.files;
 			skipChange = false;
 			insertImages(incoming);
-			renderList();
 		}
 
 		surface.querySelector('.md-toolbar')?.addEventListener('click', (event) => {
@@ -221,21 +361,53 @@
 		});
 
 		field.addEventListener('keydown', (event) => {
-			if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
-			const key = event.key.toLowerCase();
-			if (key === 'b') {
+			if ((event.metaKey || event.ctrlKey) && !event.altKey) {
+				const key = event.key.toLowerCase();
+				if (key === 'b') {
+					event.preventDefault();
+					run('bold');
+					return;
+				}
+				if (key === 'i') {
+					event.preventDefault();
+					run('italic');
+					return;
+				}
+				if (key === 'k') {
+					event.preventDefault();
+					run('link');
+					return;
+				}
+				if (key === 'enter') {
+					event.preventDefault();
+					form?.requestSubmit();
+					return;
+				}
+			}
+
+			if (event.key === 'Tab') {
+				const { from, to, block } = lineRange();
+				const lines = block.split('\n');
+				const listLike = lines.every((line) => /^(?:[-*+]|\d+\.|>)\s/.test(line) || line === '');
+				if (!listLike) return;
 				event.preventDefault();
-				run('bold');
-			} else if (key === 'i') {
-				event.preventDefault();
-				run('italic');
-			} else if (key === 'k') {
-				event.preventDefault();
-				run('link');
+				const next = event.shiftKey
+					? lines.map((line) => line.replace(/^ {0,2}/, '')).join('\n')
+					: lines.map((line) => (line ? `  ${line}` : line)).join('\n');
+				setBlock(next, from, to);
 			}
 		});
 
-		field.addEventListener('input', syncPreview);
+		field.addEventListener('input', () => {
+			updateCount();
+			scheduleDraft();
+			syncPreview();
+		});
+
+		title?.addEventListener('input', scheduleDraft);
+		journal?.addEventListener('change', scheduleDraft);
+		pubDate?.addEventListener('change', scheduleDraft);
+
 		field.addEventListener('dragover', (event) => {
 			if (event.dataTransfer?.types.includes('Files')) {
 				event.preventDefault();
@@ -250,23 +422,30 @@
 			addFiles(event.dataTransfer.files);
 		});
 
-		if (zone && input) {
-			zone.addEventListener('click', () => input.click());
-			zone.addEventListener('dragover', (event) => {
-				event.preventDefault();
-				zone.classList.add('is-over');
-			});
-			zone.addEventListener('dragleave', () => zone.classList.remove('is-over'));
-			zone.addEventListener('drop', (event) => {
-				event.preventDefault();
-				zone.classList.remove('is-over');
-				if (event.dataTransfer?.files.length) addFiles(event.dataTransfer.files);
-			});
-			input.addEventListener('click', (event) => event.stopPropagation());
-			input.addEventListener('change', () => {
-				if (skipChange) return;
-				addFiles(input.files ?? []);
-			});
-		}
+		field.addEventListener('paste', (event) => {
+			const files = [...(event.clipboardData?.files ?? [])].filter((file) =>
+				file.type.startsWith('image/'),
+			);
+			if (files.length === 0) return;
+			event.preventDefault();
+			addFiles(files);
+		});
+
+		fileInput.addEventListener('change', () => {
+			if (skipChange) return;
+			addFiles(fileInput.files ?? []);
+		});
+
+		form?.addEventListener('submit', () => {
+			clearDraft();
+			const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+			if (submit) {
+				submit.disabled = true;
+				submit.textContent = 'saving…';
+			}
+		});
+
+		restoreDraft();
+		updateCount();
 	}
 </script>

@@ -128,6 +128,50 @@ export async function listJournalsFromRepo(): Promise<GithubJournal[]> {
 	}
 }
 
+async function listJournalsFromDisk(): Promise<GithubJournal[]> {
+	const { readdir, readFile } = await import('node:fs/promises');
+	const { join } = await import('node:path');
+	const dir = join(process.cwd(), 'src/content/journals');
+	let names: string[] = [];
+	try {
+		names = await readdir(dir);
+	} catch {
+		return [];
+	}
+
+	const journals: GithubJournal[] = [];
+	for (const name of names) {
+		if (!name.endsWith('.md')) continue;
+		const raw = await readFile(join(dir, name), 'utf8');
+		const { data } = parseFrontmatter(raw);
+		const id = name.replace(/\.md$/, '');
+		journals.push({
+			id,
+			title: data.title ?? id,
+			emoji: data.emoji,
+			order: data.order ? Number(data.order) : undefined,
+		});
+	}
+
+	return journals.sort(
+		(a, b) => (a.order ?? 99) - (b.order ?? 99) || a.title.localeCompare(b.title),
+	);
+}
+
+/** Prefer GitHub (live repo). Fall back to local files when token/repo is missing. */
+export async function listJournalsForAdmin(): Promise<GithubJournal[]> {
+	const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+	const repo = import.meta.env.GITHUB_REPO || process.env.GITHUB_REPO;
+	if (token && repo) {
+		try {
+			return await listJournalsFromRepo();
+		} catch {
+			/* local fallback below */
+		}
+	}
+	return listJournalsFromDisk();
+}
+
 export async function pathExists(path: string) {
 	try {
 		await github(`/contents/${path}?ref=${encodeURIComponent(config().branch)}`);
