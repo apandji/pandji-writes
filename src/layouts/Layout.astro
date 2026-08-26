@@ -35,13 +35,13 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 		<Font cssVariable="--font-mono" />
 		<script is:inline>
 			(() => {
+				const themes = ['light', 'dark', 'e-ink'];
 				const stored = localStorage.getItem('theme');
-				const theme =
-					stored === 'light' || stored === 'dark'
-						? stored
-						: window.matchMedia('(prefers-color-scheme: dark)').matches
-							? 'dark'
-							: 'light';
+				const theme = themes.includes(stored)
+					? stored
+					: window.matchMedia('(prefers-color-scheme: dark)').matches
+						? 'dark'
+						: 'light';
 				document.documentElement.dataset.theme = theme;
 			})();
 		</script>
@@ -97,12 +97,18 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 			</main>
 		</div>
 		<script>
+			const themes = ['light', 'dark', 'e-ink'] as const;
 			const button = document.querySelector('[data-theme-toggle]');
 			const root = document.documentElement;
 
+			function nextTheme(current: string | undefined) {
+				const index = themes.indexOf(current as (typeof themes)[number]);
+				return themes[(index + 1) % themes.length];
+			}
+
 			function label() {
 				if (!button) return;
-				button.textContent = root.dataset.theme === 'dark' ? 'light' : 'dark';
+				button.textContent = nextTheme(root.dataset.theme);
 			}
 
 			function setTheme(theme: string) {
@@ -114,7 +120,7 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 
 			label();
 			button?.addEventListener('click', () => {
-				setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+				setTheme(nextTheme(root.dataset.theme));
 			});
 		</script>
 	</body>

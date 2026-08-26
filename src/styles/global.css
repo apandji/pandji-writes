@@ -1,4 +1,5 @@
-:root {
+:root,
+html[data-theme='light'] {
 	--bg: #f2f1ef;
 	--text: #3d3c38;
 	--muted: #8a8984;
@@ -16,6 +17,17 @@ html[data-theme='dark'] {
 	--rule: #2c2c29;
 	--code-bg: #1f1f1c;
 	color-scheme: dark;
+}
+
+/* Darker gray ground, soft charcoal — low contrast, easy on the eyes */
+html[data-theme='e-ink'] {
+	--bg: #b0b0aa;
+	--text: #2e2e2b;
+	--muted: #555550;
+	--soft: #72726c;
+	--rule: #9a9a94;
+	--code-bg: #a4a49e;
+	color-scheme: light;
 }
 
 *,
