@@ -1,0 +1,85 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { formatDate } from '../../lib/site';
+import { listJournalsForAdmin, listPostsForAdmin } from '../../lib/github';
+
+const journals = await listJournalsForAdmin();
+const journalTitle = Object.fromEntries(journals.map((journal) => [journal.id, journal.title]));
+const drafts = (await listPostsForAdmin()).filter((post) => post.draft);
+
+function parseDay(value: string) {
+	const date = new Date(`${value}T00:00:00Z`);
+	return Number.isNaN(date.valueOf()) ? value : formatDate(date);
+}
+---
+
+<AdminLayout
+	title="drafts"
+	crumbs={[
+		{ href: '/admin', label: 'admin' },
+		{ label: 'drafts' },
+	]}
+>
+	{
+		Astro.url.searchParams.get('saved') === 'draft' && (
+			<p class="admin-note">draft saved. it stays off the public site until you publish.</p>
+		)
+	}
+
+	<section class="admin-section">
+		<p class="admin-kicker">on this device</p>
+		<p class="admin-draft" data-local-draft hidden>
+			<a href="/admin/posts/new?resume=1">continue</a>
+			<span data-draft-title></span>
+		</p>
+		<p class="empty-poem" data-local-empty hidden>nothing open on this browser.</p>
+	</section>
+
+	<section class="admin-section">
+		<p class="admin-kicker">saved drafts</p>
+		{
+			drafts.length === 0 ? (
+				<p class="empty-poem">nothing waiting to publish.</p>
+			) : (
+				<ul class="admin-list">
+					{drafts.map((post) => (
+						<li>
+							<a
+								class="admin-journal-name"
+								href={`/admin/posts/new?journal=${encodeURIComponent(post.journal)}&slug=${encodeURIComponent(post.id)}`}
+							>
+								{post.title}
+							</a>
+							<span class="admin-post-date">
+								{(journalTitle[post.journal] ?? post.journal).toLowerCase()}
+								· {parseDay(post.pubDate)}
+							</span>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</section>
+</AdminLayout>
+
+<script>
+	const row = document.querySelector<HTMLElement>('[data-local-draft]');
+	const empty = document.querySelector<HTMLElement>('[data-local-empty]');
+	const titleEl = document.querySelector<HTMLElement>('[data-draft-title]');
+	if (row && empty) {
+		try {
+			const raw = localStorage.getItem('post-draft');
+			const draft = raw ? (JSON.parse(raw) as { title?: string; body?: string }) : null;
+			if (draft && (draft.body?.trim() || draft.title?.trim())) {
+				row.hidden = false;
+				if (titleEl && draft.title?.trim()) titleEl.textContent = `· ${draft.title.trim()}`;
+			} else {
+				empty.hidden = false;
+			}
+		} catch {
+			empty.hidden = false;
+		}
+	}
+</script>

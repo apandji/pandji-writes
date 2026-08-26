@@ -3,7 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import MarkdownEditor from '../../../components/MarkdownEditor.astro';
-import { listJournalsForAdmin } from '../../../lib/github';
+import { getPostForAdmin, listJournalsForAdmin } from '../../../lib/github';
 
 let journals: { id: string; title: string }[] = [];
 let loadError = '';
@@ -16,7 +16,9 @@ try {
 
 const today = new Date().toISOString().slice(0, 10);
 const selectedJournal = Astro.url.searchParams.get('journal') ?? '';
+const slug = Astro.url.searchParams.get('slug') ?? '';
 const resume = Astro.url.searchParams.get('resume') === '1';
+const existing = slug ? await getPostForAdmin(slug) : null;
 const error = Astro.url.searchParams.get('error');
 const errorText =
 	error === 'missing'
@@ -29,15 +31,34 @@ const errorText =
 					? 'images need to be jpeg, png, webp, or gif, under 1 MB, and no more than four.'
 					: error;
 
-const journalExists = journals.some((journal) => journal.id === selectedJournal);
+const journalId = existing?.journal || (journals.some((item) => item.id === selectedJournal) ? selectedJournal : '');
+const journal = journals.find((item) => item.id === journalId);
+const editing = Boolean(existing);
+const crumbLabel = existing?.title
+	? existing.title.toLowerCase()
+	: editing
+		? 'edit'
+		: 'new post';
 ---
 
-<AdminLayout title="new post" wide>
+<AdminLayout
+	title={editing ? existing?.title || 'edit post' : 'new post'}
+	wide
+	crumbs={[
+		{ href: '/admin', label: 'admin' },
+		...(journal
+			? [{ href: `/admin/journals/${journal.id}`, label: journal.title.toLowerCase() }]
+			: []),
+		{ label: crumbLabel },
+	]}
+>
 	{
 		loadError ? (
 			<p class="admin-error">{loadError}</p>
 		) : journals.length === 0 ? (
-			<p class="empty-poem">make a journal first.</p>
+			<p class="empty-poem">
+				make a journal first. <a href="/admin/journals/new">+</a>
+			</p>
 		) : (
 			<form
 				class="admin-form admin-form--write"
@@ -45,43 +66,51 @@ const journalExists = journals.some((journal) => journal.id === selectedJournal)
 				action="/api/admin/posts"
 				enctype="multipart/form-data"
 				data-resume={resume ? '1' : '0'}
-				data-prefer-journal={journalExists ? selectedJournal : ''}
+				data-prefer-journal={journalId}
 			>
-				<header class="write-header">
-					<p class="admin-kicker">new post</p>
-					{errorText && <p class="admin-error">{errorText}</p>}
-				</header>
+				{existing && <input type="hidden" name="slug" value={existing.id} />}
 
 				<div class="write-meta">
 					<label>
 						<span>journal</span>
 						<select name="journal" required>
-							{journals.map((journal) => (
-								<option value={journal.id} selected={journalExists && journal.id === selectedJournal}>
-									{journal.title}
+							{journals.map((item) => (
+								<option value={item.id} selected={item.id === journalId}>
+									{item.title}
 								</option>
 							))}
 						</select>
 					</label>
 					<label class="write-title">
 						<span>title</span>
-						<input type="text" name="title" required maxlength="120" placeholder="what is this about?" />
+						<input
+							type="text"
+							name="title"
+							required
+							maxlength="120"
+							placeholder="what is this about?"
+							value={existing?.title ?? ''}
+						/>
 					</label>
 					<label>
 						<span>date</span>
-						<input type="date" name="pubDate" value={today} required />
+						<input type="date" name="pubDate" value={existing?.pubDate || today} required />
 					</label>
 				</div>
 
 				<div class="admin-field write-body">
 					<span class="write-body-label">body</span>
-					<MarkdownEditor />
+					<MarkdownEditor value={existing?.body ?? ''} />
 				</div>
 
 				<div class="write-actions">
-					<button type="submit">save</button>
-					<p class="admin-hint">type / for blocks · images via toolbar, paste, or drop</p>
+					<div class="write-actions-buttons">
+						<button type="submit" name="intent" value="draft">save draft</button>
+						<button type="submit" name="intent" value="publish">publish</button>
+					</div>
+					<p class="admin-hint">draft stays private · publish waits for a rebuild</p>
 				</div>
+				{errorText && <p class="admin-error">{errorText}</p>}
 			</form>
 		)
 	}

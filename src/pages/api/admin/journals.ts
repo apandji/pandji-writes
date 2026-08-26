@@ -38,7 +38,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 			`Add journal: ${title}`,
 		);
 
-		return redirect('/admin?saved=journal');
+		const id = path.replace(/^src\/content\/journals\//, '').replace(/\.md$/, '');
+		return redirect(`/admin/journals/${id}?saved=journal`);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'save failed';
 		return redirect(`/admin/journals/new?error=${encodeURIComponent(message)}`);

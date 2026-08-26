@@ -9,6 +9,13 @@ const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_BYTES = 1_000_000;
 const MAX_FILES = 4;
 
+function fail(journal: string, slug: string, error: string) {
+	const params = new URLSearchParams({ error });
+	if (journal) params.set('journal', journal);
+	if (slug) params.set('slug', slug);
+	return `/admin/posts/new?${params}`;
+}
+
 export const POST: APIRoute = async ({ request, redirect }) => {
 	if (!isSameOrigin(request)) {
 		return new Response('forbidden', { status: 403 });
@@ -19,34 +26,40 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 		const title = String(data.get('title') ?? '').trim();
 		const journal = String(data.get('journal') ?? '').trim();
 		const pubDate = String(data.get('pubDate') ?? '').trim();
+		const slugInput = String(data.get('slug') ?? '').trim();
+		const intent = String(data.get('intent') ?? 'publish');
+		const isDraft = intent === 'draft';
 		let body = String(data.get('body') ?? '');
 		const images = data.getAll('images').filter((value): value is File => value instanceof File && value.size > 0);
 
 		if (!title || !journal || !pubDate) {
-			return redirect('/admin/posts/new?error=missing');
+			return redirect(fail(journal, slugInput, 'missing'));
 		}
 
 		if (!/^\d{4}-\d{2}-\d{2}$/.test(pubDate)) {
-			return redirect('/admin/posts/new?error=date');
+			return redirect(fail(journal, slugInput, 'date'));
 		}
 
 		const journals = await listJournalsFromRepo();
 		if (!journals.some((item) => item.id === journal)) {
-			return redirect('/admin/posts/new?error=journal');
+			return redirect(fail(journal, slugInput, 'journal'));
 		}
 
 		if (images.length > MAX_FILES) {
-			return redirect('/admin/posts/new?error=images');
+			return redirect(fail(journal, slugInput, 'images'));
 		}
 
-		const postPath = await uniquePath('src/content/posts', slugify(title));
+		const postPath =
+			slugInput && /^[a-z0-9-]+$/.test(slugInput)
+				? `src/content/posts/${slugInput}.md`
+				: await uniquePath('src/content/posts', slugify(title));
 		const slug = postPath.replace(/^src\/content\/posts\//, '').replace(/\.md$/, '');
 		const files: { path: string; content: string | Uint8Array }[] = [];
 		const usedNames = new Set<string>();
 
 		for (const image of images) {
 			if (!ALLOWED.has(image.type) || image.size > MAX_BYTES) {
-				return redirect('/admin/posts/new?error=images');
+				return redirect(fail(journal, slugInput, 'images'));
 			}
 
 			let name = safeFilename(image.name);
@@ -66,15 +79,18 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
 		files.unshift({
 			path: postPath,
-			content: postMarkdown({ title, pubDate, journal, body }),
+			content: postMarkdown({ title, pubDate, journal, body, draft: isDraft }),
 		});
 
-		await commitFiles(files, `Add post: ${title}`);
-		return redirect(
-			`/admin?saved=post&journal=${encodeURIComponent(journal)}&post=${encodeURIComponent(slug)}`,
-		);
+		await commitFiles(files, isDraft ? `Draft post: ${title}` : `Add post: ${title}`);
+
+		if (isDraft) {
+			return redirect(`/admin/drafts?saved=draft`);
+		}
+
+		return redirect(`/admin/journals/${encodeURIComponent(journal)}?saved=post`);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'save failed';
-		return redirect(`/admin/posts/new?error=${encodeURIComponent(message)}`);
+		return redirect(fail('', '', message));
 	}
 };

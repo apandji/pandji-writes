@@ -1,15 +1,21 @@
 ---
 import { Font } from 'astro:assets';
-import { site } from '../lib/site';
 import '../styles/global.css';
+
+export type AdminCrumb = {
+	href?: string;
+	label: string;
+};
 
 interface Props {
 	title?: string;
 	wide?: boolean;
+	crumbs?: AdminCrumb[];
 }
 
-const { title, wide = false } = Astro.props;
-const pageTitle = title ? `${title} — ${site.name}` : `admin — ${site.name}`;
+const adminName = 'pandji admins.';
+const { title, wide = false, crumbs = [] } = Astro.props;
+const pageTitle = title ? `${title} — ${adminName}` : adminName;
 ---
 
 <!doctype html>
@@ -36,20 +42,38 @@ const pageTitle = title ? `${title} — ${site.name}` : `admin — ${site.name}`
 			})();
 		</script>
 	</head>
-	<body>
+	<body class="is-admin">
 		<div class:list={[wide ? 'wrap wrap--wide' : 'wrap']}>
 			<header class="site-header">
-				<a class="site-title" href="/">{site.name}</a>
+				<a class="site-title" href="/admin">{adminName}</a>
 				<nav class="admin-nav">
-					<a href="/admin">admin</a>
-					<a href="/admin/journals/new">journal</a>
-					<a href="/admin/posts/new">write</a>
+					<a href="/admin/drafts">drafts</a>
 					<form method="post" action="/api/admin/logout">
 						<button class="theme-toggle" type="submit">log out</button>
 					</form>
 					<button class="theme-toggle" type="button" data-theme-toggle>dark</button>
 				</nav>
 			</header>
+			{
+				crumbs.length > 0 && (
+					<nav class="admin-crumbs" aria-label="breadcrumb">
+						{crumbs.map((crumb, index) => (
+							<>
+								{index > 0 && (
+									<span class="admin-crumbs-sep" aria-hidden="true">
+										/
+									</span>
+								)}
+								{crumb.href ? (
+									<a href={crumb.href}>{crumb.label}</a>
+								) : (
+									<span aria-current="page">{crumb.label}</span>
+								)}
+							</>
+						))}
+					</nav>
+				)
+			}
 			<main class="page">
 				<slot />
 			</main>

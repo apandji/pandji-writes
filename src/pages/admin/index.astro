@@ -6,8 +6,6 @@ import { journalMark } from '../../lib/site';
 import { listJournalsForAdmin } from '../../lib/github';
 
 const saved = Astro.url.searchParams.get('saved');
-const savedJournal = Astro.url.searchParams.get('journal') ?? '';
-const savedPost = Astro.url.searchParams.get('post') ?? '';
 let journals: { id: string; title: string; emoji?: string }[] = [];
 let loadError = '';
 
@@ -21,45 +19,19 @@ const note =
 	saved === 'journal'
 		? 'journal committed. the site will catch up in a minute.'
 		: saved === 'post'
-			? 'post committed. the site will catch up in a minute.'
+			? 'post published. the site will catch up in a minute.'
 			: '';
-
-const journalHref = savedJournal ? `/journals/${savedJournal}` : '';
-const postHref = savedJournal && savedPost ? `/journals/${savedJournal}/${savedPost}` : '';
 ---
 
 <AdminLayout>
-	{
-		note && (
-			<div class="admin-banner">
-				<p class="admin-note">{note}</p>
-				{
-					saved === 'post' && journalHref && (
-						<p class="admin-follow">
-							{postHref ? <a href={postHref}>open post</a> : null}
-							{postHref && journalHref ? <span aria-hidden="true">·</span> : null}
-							<a href={journalHref}>open journal</a>
-							<span aria-hidden="true">·</span>
-							<span>refresh if the deploy is still running</span>
-						</p>
-					)
-				}
-			</div>
-		)
-	}
+	{note && <p class="admin-note">{note}</p>}
 	{loadError && <p class="admin-error">{loadError}</p>}
-
-	<p class="admin-draft" data-continue-draft hidden>
-		<a href="/admin/posts/new?resume=1">continue draft</a>
-		<span data-draft-title></span>
-	</p>
 
 	<section class="admin-section">
 		<header class="write-header">
-			<p class="admin-kicker">journals</p>
-			<p class="admin-actions admin-actions--inline">
-				<a href="/admin/journals/new">new journal</a>
-				<a class="admin-primary" href="/admin/posts/new">write</a>
+			<p class="admin-kicker admin-kicker--row">
+				journals
+				<a class="admin-add" href="/admin/journals/new" aria-label="new journal">+</a>
 			</p>
 		</header>
 		{
@@ -72,7 +44,9 @@ const postHref = savedJournal && savedPost ? `/journals/${savedJournal}/${savedP
 							<span class="home-mark" aria-hidden="true">
 								{journalMark(journal.id, journal.emoji)}
 							</span>
-							<span class="admin-journal-name">{journal.title}</span>
+							<a class="admin-journal-name" href={`/admin/journals/${journal.id}`}>
+								{journal.title}
+							</a>
 							<a
 								class="admin-journal-write"
 								href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}
@@ -86,25 +60,3 @@ const postHref = savedJournal && savedPost ? `/journals/${savedJournal}/${savedP
 		}
 	</section>
 </AdminLayout>
-
-<script>
-	const DRAFT_KEY = 'post-draft';
-	const row = document.querySelector<HTMLElement>('[data-continue-draft]');
-	const titleEl = document.querySelector<HTMLElement>('[data-draft-title]');
-	if (row) {
-		try {
-			const raw = localStorage.getItem(DRAFT_KEY);
-			if (raw) {
-				const draft = JSON.parse(raw) as { title?: string; body?: string };
-				if (draft.body?.trim() || draft.title?.trim()) {
-					row.hidden = false;
-					if (titleEl && draft.title?.trim()) {
-						titleEl.textContent = `· ${draft.title.trim()}`;
-					}
-				}
-			}
-		} catch {
-			/* ignore */
-		}
-	}
-</script>

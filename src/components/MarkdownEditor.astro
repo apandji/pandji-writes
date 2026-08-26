@@ -1,9 +1,10 @@
 ---
 interface Props {
 	draftKey?: string;
+	value?: string;
 }
 
-const { draftKey = 'post-draft' } = Astro.props;
+const { draftKey = 'post-draft', value = '' } = Astro.props;
 ---
 
 <div class="md-editor" data-md-editor data-draft-key={draftKey}>
@@ -38,7 +39,7 @@ const { draftKey = 'post-draft' } = Astro.props;
 		required
 		data-md-body
 		placeholder="Write here. Type / for blocks. Drop or paste images inline."
-	></textarea>
+	>{value}</textarea>
 	<div class="md-preview prose" hidden data-md-preview></div>
 	<input
 		type="file"
@@ -51,7 +52,7 @@ const { draftKey = 'post-draft' } = Astro.props;
 	<ul class="md-slash" hidden data-md-slash role="listbox" aria-label="insert block"></ul>
 	<div class="md-status">
 		<span data-md-count>0 words</span>
-		<span class="md-status-hint">/ blocks · ⌘/Ctrl + Enter to save · drafts auto-saved</span>
+		<span class="md-status-hint">/ blocks · ⌘/Ctrl + Enter to publish · drafts auto-saved here</span>
 		<span data-md-draft-note hidden>draft restored</span>
 	</div>
 </div>
@@ -152,8 +153,7 @@ const { draftKey = 'post-draft' } = Astro.props;
 		}
 
 		function restoreDraft() {
-			const shouldRestore = resume || !preferJournal;
-			if (!shouldRestore) return;
+			if (field.value.trim()) return;
 			try {
 				const raw = localStorage.getItem(draftKey);
 				if (!raw) return;
@@ -164,8 +164,8 @@ const { draftKey = 'post-draft' } = Astro.props;
 					body?: string;
 				};
 				if (!draft.body && !draft.title) return;
-				const empty = !field.value.trim() && !(title?.value ?? '').trim();
-				if (!empty && !resume) return;
+				const matchesJournal = !preferJournal || !draft.journal || draft.journal === preferJournal;
+				if (!resume && !matchesJournal) return;
 				if (title && draft.title) title.value = draft.title;
 				if (journal && draft.journal && !preferJournal) journal.value = draft.journal;
 				if (pubDate && draft.pubDate) pubDate.value = draft.pubDate;
@@ -568,7 +568,9 @@ const { draftKey = 'post-draft' } = Astro.props;
 				}
 				if (key === 'enter') {
 					event.preventDefault();
-					form?.requestSubmit();
+					const publish = form?.querySelector<HTMLButtonElement>('button[name="intent"][value="publish"]');
+					if (form && publish) form.requestSubmit(publish);
+					else form?.requestSubmit();
 					return;
 				}
 			}
@@ -636,11 +638,9 @@ const { draftKey = 'post-draft' } = Astro.props;
 		});
 
 		form?.addEventListener('submit', () => {
-			clearDraft();
-			const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-			if (submit) {
-				submit.disabled = true;
-				submit.textContent = 'saving…';
+			if (!form) return;
+			for (const button of form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')) {
+				button.disabled = true;
 			}
 		});
 

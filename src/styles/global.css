@@ -427,10 +427,74 @@ html[data-theme='dark'] .prose pre.astro-code span {
 	}
 }
 
+body.is-admin::before {
+	content: '';
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: #e07a3a;
+	z-index: 40;
+}
+
+.admin-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.4rem;
+	margin: -1.1rem 0 1.6rem;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
+.admin-crumbs a:hover {
+	color: var(--text);
+}
+
+.admin-crumbs-sep {
+	color: var(--poem);
+}
+
+.admin-kicker--row {
+	display: flex;
+	align-items: baseline;
+	gap: 0.45rem;
+}
+
+.admin-add {
+	color: var(--muted);
+	font-size: 1.05rem;
+	line-height: 1;
+}
+
+.admin-add:hover {
+	color: var(--text);
+	text-decoration: none;
+}
+
+.admin-list a.admin-journal-name {
+	flex: 1;
+	min-width: 0;
+}
+
+.admin-flag {
+	flex: none;
+	color: var(--poem);
+	font-size: 0.75rem;
+	font-style: italic;
+}
+
+.admin-post-date {
+	flex: none;
+	color: var(--muted);
+	font-size: 0.8125rem;
+}
+
 .admin-nav {
 	display: flex;
 	align-items: baseline;
-	gap: 1rem;
+	gap: 1.15rem;
 	color: var(--muted);
 	font-size: 0.8125rem;
 }
@@ -441,7 +505,7 @@ html[data-theme='dark'] .prose pre.astro-code span {
 }
 
 .admin-nav form {
-	display: inline;
+	display: flex;
 	margin: 0;
 }
 
@@ -535,6 +599,16 @@ html[data-theme='dark'] .prose pre.astro-code span {
 	gap: 1rem;
 	flex-wrap: wrap;
 	padding-top: 0.25rem;
+}
+
+.write-actions-buttons {
+	display: flex;
+	align-items: baseline;
+	gap: 1.15rem;
+}
+
+.admin-form button[name='intent'][value='draft'] {
+	color: var(--muted);
 }
 
 .admin-form label,

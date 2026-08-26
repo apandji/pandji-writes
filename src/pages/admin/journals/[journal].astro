@@ -1,0 +1,92 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { formatDate, journalMark } from '../../../lib/site';
+import { listJournalsForAdmin, listPostsForAdmin } from '../../../lib/github';
+
+const { journal: journalId } = Astro.params;
+const saved = Astro.url.searchParams.get('saved');
+
+const journals = await listJournalsForAdmin();
+const journal = journals.find((item) => item.id === journalId);
+
+if (!journal) {
+	return Astro.redirect('/admin');
+}
+
+const posts = (await listPostsForAdmin()).filter((post) => post.journal === journal.id);
+const mark = journalMark(journal.id, journal.emoji);
+
+function parseDay(value: string) {
+	const date = new Date(`${value}T00:00:00Z`);
+	return Number.isNaN(date.valueOf()) ? value : formatDate(date);
+}
+---
+
+<AdminLayout
+	title={journal.title}
+	crumbs={[
+		{ href: '/admin', label: 'admin' },
+		{ label: journal.title.toLowerCase() },
+	]}
+>
+	{
+		saved === 'journal' && (
+			<p class="admin-note">journal committed. the site will catch up in a minute.</p>
+		)
+	}
+	{
+		saved === 'post' && (
+			<p class="admin-note" data-clear-draft>
+				post published. the site will catch up in a minute.
+			</p>
+		)
+	}
+
+	<section class="admin-section">
+		<header class="write-header">
+			<p class="admin-kicker admin-kicker--row">
+				<span class="home-mark" aria-hidden="true">{mark}</span>
+				{journal.title.toLowerCase()}
+				<a
+					class="admin-add"
+					href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}`}
+					aria-label={`write in ${journal.title}`}
+				>
+					+
+				</a>
+			</p>
+		</header>
+		{
+			posts.length === 0 ? (
+				<p class="empty-poem">nothing written yet.</p>
+			) : (
+				<ul class="admin-list">
+					{posts.map((post) => (
+						<li>
+							<a
+								class="admin-journal-name"
+								href={`/admin/posts/new?journal=${encodeURIComponent(journal.id)}&slug=${encodeURIComponent(post.id)}`}
+							>
+								{post.title}
+							</a>
+							{post.draft && <span class="admin-flag">draft</span>}
+							<span class="admin-post-date">{parseDay(post.pubDate)}</span>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</section>
+</AdminLayout>
+
+<script>
+	if (document.querySelector('[data-clear-draft]')) {
+		try {
+			localStorage.removeItem('post-draft');
+		} catch {
+			/* ignore */
+		}
+	}
+</script>

@@ -14,6 +14,15 @@ type GithubJournal = {
 	order?: number;
 };
 
+export type GithubPost = {
+	id: string;
+	title: string;
+	journal: string;
+	pubDate: string;
+	draft: boolean;
+	body?: string;
+};
+
 function config() {
 	const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
 	const repo = import.meta.env.GITHUB_REPO || process.env.GITHUB_REPO;
@@ -170,6 +179,73 @@ export async function listJournalsForAdmin(): Promise<GithubJournal[]> {
 		}
 	}
 	return listJournalsFromDisk();
+}
+
+function postFromMarkdown(id: string, raw: string): GithubPost {
+	const { data, body } = parseFrontmatter(raw);
+	return {
+		id,
+		title: data.title ?? id,
+		journal: data.journal ?? '',
+		pubDate: data.pubDate ?? '',
+		draft: data.draft === 'true' || data.draft === 'yes',
+		body,
+	};
+}
+
+async function listPostsFromRepo(): Promise<GithubPost[]> {
+	const listing = await github('/contents/src/content/posts?ref=' + encodeURIComponent(config().branch));
+	if (!Array.isArray(listing)) return [];
+
+	const posts: GithubPost[] = [];
+	for (const item of listing) {
+		if (item.type !== 'file' || !item.name.endsWith('.md')) continue;
+		const file = await github(`/contents/${item.path}?ref=${encodeURIComponent(config().branch)}`);
+		const raw = Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8');
+		posts.push(postFromMarkdown(item.name.replace(/\.md$/, ''), raw));
+	}
+
+	return posts.sort((a, b) => b.pubDate.localeCompare(a.pubDate) || a.title.localeCompare(b.title));
+}
+
+async function listPostsFromDisk(): Promise<GithubPost[]> {
+	const { readdir, readFile } = await import('node:fs/promises');
+	const { join } = await import('node:path');
+	const dir = join(process.cwd(), 'src/content/posts');
+	let names: string[] = [];
+	try {
+		names = await readdir(dir);
+	} catch {
+		return [];
+	}
+
+	const posts: GithubPost[] = [];
+	for (const name of names) {
+		if (!name.endsWith('.md')) continue;
+		const raw = await readFile(join(dir, name), 'utf8');
+		posts.push(postFromMarkdown(name.replace(/\.md$/, ''), raw));
+	}
+
+	return posts.sort((a, b) => b.pubDate.localeCompare(a.pubDate) || a.title.localeCompare(b.title));
+}
+
+export async function listPostsForAdmin(): Promise<GithubPost[]> {
+	const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+	const repo = import.meta.env.GITHUB_REPO || process.env.GITHUB_REPO;
+	if (token && repo) {
+		try {
+			return await listPostsFromRepo();
+		} catch {
+			/* local fallback below */
+		}
+	}
+	return listPostsFromDisk();
+}
+
+export async function getPostForAdmin(id: string): Promise<GithubPost | null> {
+	if (!/^[a-z0-9-]+$/.test(id)) return null;
+	const posts = await listPostsForAdmin();
+	return posts.find((post) => post.id === id) ?? null;
 }
 
 export async function pathExists(path: string) {

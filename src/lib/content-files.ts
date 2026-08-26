@@ -41,17 +41,17 @@ export function postMarkdown(input: {
 	pubDate: string;
 	journal: string;
 	body: string;
+	draft?: boolean;
 }) {
-	return [
+	const lines = [
 		'---',
 		`title: ${escapeYaml(input.title)}`,
 		`pubDate: ${input.pubDate}`,
 		`journal: ${input.journal}`,
-		'---',
-		'',
-		input.body.trim(),
-		'',
-	].join('\n');
+	];
+	if (input.draft) lines.push('draft: true');
+	lines.push('---', '', input.body.trim(), '');
+	return lines.join('\n');
 }
 
 function escapeYaml(value: string) {

@@ -7,13 +7,14 @@ import { journalMarks } from '../../../lib/site';
 const error = Astro.url.searchParams.get('error');
 ---
 
-<AdminLayout title="new journal">
+<AdminLayout
+	title="new journal"
+	crumbs={[
+		{ href: '/admin', label: 'admin' },
+		{ label: 'new journal' },
+	]}
+>
 	<form class="admin-form admin-form--journal" method="post" action="/api/admin/journals">
-		<header class="write-header">
-			<p class="admin-kicker">new journal</p>
-			{error && <p class="admin-error">{error === 'title' ? 'needs a title.' : error}</p>}
-		</header>
-
 		<label>
 			<span>title</span>
 			<input type="text" name="title" required maxlength="80" placeholder="series name" autofocus />
@@ -37,7 +38,8 @@ const error = Astro.url.searchParams.get('error');
 
 		<div class="write-actions">
 			<button type="submit">save</button>
-			<p class="admin-hint">shows on the homepage with its own feed.</p>
+			<p class="admin-hint">a room on the homepage. you can write in it next.</p>
 		</div>
+		{error && <p class="admin-error">{error === 'title' ? 'needs a title.' : error}</p>}
 	</form>
 </AdminLayout>
