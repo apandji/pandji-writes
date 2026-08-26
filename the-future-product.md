@@ -8,12 +8,95 @@ Map of forks: `where-this-could-go.md`. Personal portfolio path: `portfolio-road
 
 Do not build the packaging yet. This is a note for later.
 
+## Advice: where to take this next
+
+Do **not** start by perfecting upgrades or a monorepo. Sequence:
+
+1. **Unblock naming in this repo** — move `pandji writes.` out of hardcoded `site.ts` into config/env. Personal site keeps working; the gift needs the same seam.
+2. **Pick a lane for the next real build** — either live on the portfolio (`portfolio-roadmap.md`) *or* package the gift for 2–3 friends. Not both at once.
+3. **When gifting:** create a **separate template repo** (see below), not a long-lived branch inside `pandji-writes`.
+4. **Treat class v1 as a snapshot** with semver tags. Build a fancy upgrade path only after someone asks to upgrade.
+
+Smallest useful step from here: site name as config. That helps you either way.
+
+## Naming the gift
+
+| Layer | Name | Notes |
+| --- | --- | --- |
+| **Project / gift** | **writes.** | Spoken “writes.” The period is part of the brand; matches how sites read. |
+| **GitHub repo** | `writes` | No trailing dot in the repo slug. Template: enable “Template repository.” |
+| **Each site** | `{name} writes.` | `april writes.`, `bradley writes.`, `pandji writes.` — unchanged. |
+| **npm / packages (later)** | `@writes/…` only if you extract shared code | Don’t create packages until upgrades hurt. |
+
+Avoid: “Writes CMS,” “Writes.js,” or naming the template after yourself (`pandji-writes-template`). The gift is the pattern; your site is one instance.
+
+`writes.` is enough. If GitHub `writes` is taken, prefer `writes-template` or `get-writes` over a cute misspelling.
+
+## Two repos (yes) — extract, don’t fork-with-history
+
+**Yes: one repo for you, one for the gift.** They should diverge on purpose.
+
+| Repo | Role | Grows into |
+| --- | --- | --- |
+| **`pandji-writes`** | Your living site | Portfolio types, kin/motifs, personal content, experiments |
+| **`writes`** | Public GitHub template | Journals + desk only; sample content; class README; versioned releases |
+
+Do **not** “Fork” `pandji-writes` on GitHub to make the gift — that copies your journals, issues, and history into everyone’s starting point. **Extract:** new repo, copy the app shell (Astro, admin, styles, empty/sample content), strip personal posts, enable Template.
+
+```text
+pandji-writes          writes (template)
+    │                      │
+    │  shared desk ideas   │
+    │◄──── backport ───────┤  (or develop desk fixes on writes first)
+    │                      │
+    ▼                      ▼
+ portfolio features     classmates' repos
+ (stay here only)       (from "Use this template")
+```
+
+**Feature discipline (this is the real version-control strategy):**
+
+- **Desk / gift features** (editor, empty states, auth, marks, deploy docs) → land in `writes` (or land here then **actively backport** to `writes` in the same sitting).
+- **Portfolio features** (projects, home composition, kin) → `pandji-writes` only. Classmates who want that follow the portfolio roadmap on their own fork later.
+
+Your personal site may run *ahead* of the template. That is fine. The template is the supported gift surface; `pandji-writes` is allowed to be weird.
+
+## Versioning and “upgrades”
+
+Classmates do not get App Store updates. They get **git repositories**. Be honest about that in the README.
+
+### v1 (class / friends) — snapshot gift
+
+- Tag releases on `writes`: `v0.1.0`, `v0.2.0`, …
+- Keep a short `CHANGELOG.md` (what improved in the desk).
+- Default story: *you received a working journal for this semester.* Copy your `src/content/` and `public/uploads/` if you ever start over from a newer template.
+- Optional advanced appendix: add `writes` as `upstream`, fetch a tag, merge — expect conflicts in app code; content folders usually fine. Not required for MDes success.
+
+**Do not promise** one-click upgrade in v1.
+
+### When upgrades become real pain (later)
+
+Only if people keep sites for a long time and ask for desk improvements:
+
+1. **Documented upstream merge** — good enough for a few friends who can git.
+2. **Extract shared package** (`@writes/desk` or similar) — their repo is mostly content + thin config; `npm update` brings desk fixes. More engineering; best upgrade UX; do this only after (1) is annoying.
+
+Until then, growing features on `pandji-writes` without backporting means **friends do not get them.** That is the tradeoff. Either backport desk work to `writes` releases, or accept drift.
+
+### Practical habit
+
+When you build something on your site, ask once: *Is this desk or portfolio?*
+
+- Desk → release on `writes` (even a patch tag) when you want friends to have it.
+- Portfolio → stay private to `pandji-writes`.
+
 ## Shape
 
 ```mermaid
 flowchart LR
-  template["GitHub template"] --> fork["april's repo"]
-  fork --> config["SITE_NAME=april"]
+  template["writes template"] --> use["Use this template"]
+  use --> repo["april's repo"]
+  repo --> config["name → april writes."]
   config --> deploy["Their Vercel"]
   deploy --> site["april writes."]
   site --> admin["Their /admin"]
@@ -79,7 +162,7 @@ If someone grows a large personal corpus, they can follow `portfolio-roadmap.md`
 
 **You don’t owe:** hosting, uptime, password resets, content moderation, a shared directory, or merging every classmate’s feature request into your personal portfolio repo.
 
-Keep the template repo separate from `pandji-writes` when you gift it — your portfolio and the class tool should not share one main branch forever.
+Keep the template repo (`writes`) separate from `pandji-writes` when you gift it — your portfolio and the class tool should not share one main branch forever.
 
 ## Deliberately later
 
@@ -92,7 +175,7 @@ Keep the template repo separate from `pandji-writes` when you gift it — your p
 - Motif taxonomies, discovery feed, follows
 - A required public registry of all `{name} writes.` sites
 
-Optional later gift: “Update from upstream” notes for classmates who want desk improvements without rebuilding.
+Optional later gift: documented upstream merge notes; still later, `@writes/desk` as a package if merge pain is real.
 
 ## What would break the spell
 
@@ -100,10 +183,10 @@ Making *you* the host of everyone’s writing. A setup that requires editing fiv
 
 ## First slice, if this is ever packaged
 
-1. Extract or duplicate into a clean template repo (no personal posts).
-2. `SITE_NAME` / author config driving `{name} writes.` everywhere (including admin chrome).
-3. README: five steps for MDes classmates (template → Vercel → env → name → first post).
-4. One sample journal, empty of your voice.
+1. Site name/author as config in `pandji-writes` (practice the seam).
+2. New repo **`writes`**: extract app shell, no personal posts; enable GitHub Template.
+3. Same name config + five-step MDes README (template → Vercel → env → name → first post).
+4. Tag `v0.1.0` + short changelog; one sample journal empty of your voice.
 5. Hand to 2–3 friends before the whole class.
 
 That is enough to gift. Hosting many writers on one app is a different story — only if the template spreads and people ask for zero-setup.

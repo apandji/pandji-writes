@@ -92,10 +92,12 @@ Same gift, tuned first-run copy for MDes (design journals, studio notes, critiqu
 
 ## What to choose next
 
-When energy returns, pick **one** jumping point and ignore the rest:
+When energy returns, pick **one** lane:
 
 1. **Live on it** → portfolio fork (`portfolio-roadmap.md`), starting with identity + projects + home.
-2. **Gift it to class** → OSS fork (`the-future-product.md`), starting with template repo + name config + five-step README → 2–3 friends before the whole cohort.
-3. **Something smaller** → often the desk, empty-state craft, or extracting config for `{name} writes.` inside this repo first.
+2. **Gift it to class** → `writes` template (`the-future-product.md`): extract repo + name config + five-step README → 2–3 friends → semver tags. Upgrades stay snapshot-honest until someone asks.
+3. **Something smaller (good default)** → make site name configurable in `pandji-writes` first — unblocks both forks.
 
 Connection layers (rooms → metadata → kin) can travel with whichever fork you pick. They are not a third product by themselves.
+
+**Repo split reminder:** `pandji-writes` (you) and `writes` (gift) should be separate when packaging — extract a clean template, don’t fork your content history. Details in `the-future-product.md`.
