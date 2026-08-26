@@ -1,6 +1,6 @@
 ---
 title: ix3
-emoji: ⬡
+emoji: "⬡"
 order: 5
 ---
 

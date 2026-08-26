@@ -1,6 +1,6 @@
 ---
 title: essays
-emoji: ✧
+emoji: "✧"
 order: 3
 ---
 
