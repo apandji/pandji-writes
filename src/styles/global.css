@@ -81,10 +81,45 @@ a:hover {
 	gap: 1.5rem;
 }
 
+.site-crumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.45rem;
+	min-width: 0;
+}
+
 .site-title {
 	font-size: 0.9375rem;
 	font-weight: 400;
 	letter-spacing: 0.04em;
+}
+
+.site-crumbs-sep {
+	color: var(--poem);
+}
+
+.site-crumb {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.45rem;
+	color: var(--muted);
+	font-size: 0.9375rem;
+	letter-spacing: 0.02em;
+	text-transform: lowercase;
+}
+
+.site-crumb .home-mark {
+	font-size: 0.9rem;
+}
+
+a.site-crumb:hover {
+	color: var(--text);
+	text-decoration: none;
+}
+
+.site-crumb[aria-current='page'] {
+	color: var(--text);
 }
 
 .theme-toggle {
@@ -162,26 +197,6 @@ a:hover {
 	padding-bottom: 3rem;
 }
 
-.index-heading {
-	display: flex;
-	align-items: baseline;
-	gap: 0.5rem;
-	margin: 0 0 1.6rem;
-}
-
-.index-mark {
-	flex: none;
-	font-size: 0.9rem;
-	line-height: 1.35;
-}
-
-.index-journal {
-	font-size: 0.8125rem;
-	line-height: 1.35;
-	text-transform: lowercase;
-	color: var(--muted);
-}
-
 .index-list {
 	list-style: none;
 	margin: 0;
@@ -219,13 +234,6 @@ a:hover {
 	margin-top: 5.5rem;
 	padding-top: 5.5rem;
 	border-top: 1px solid var(--rule);
-}
-
-.post-kicker {
-	margin: 0 0 0.35rem;
-	color: var(--muted);
-	font-size: 0.8125rem;
-	text-transform: lowercase;
 }
 
 .journal-title,
@@ -271,7 +279,7 @@ a:hover {
 
 .empty,
 .empty-poem {
-	margin: 0;
+	margin: 2.5rem 0 0;
 	color: var(--poem);
 	font-weight: 300;
 	font-style: italic;
@@ -838,31 +846,6 @@ body.is-admin::before {
 .md-slash-hint {
 	color: var(--muted);
 	font-size: 0.75rem;
-}
-
-.index-write {
-	margin: 1.4rem 0 0;
-	font-size: 0.8125rem;
-	color: var(--muted);
-}
-
-.index-write a:hover {
-	color: var(--text);
-}
-
-.empty-invite {
-	display: grid;
-	gap: 1rem;
-}
-
-.empty-cta {
-	margin: 0;
-	font-size: 0.875rem;
-	color: var(--muted);
-}
-
-.empty-cta a {
-	color: var(--text);
 }
 
 .admin-banner {

@@ -3,14 +3,21 @@ import { Font } from 'astro:assets';
 import { site } from '../lib/site';
 import '../styles/global.css';
 
+interface Crumb {
+	href?: string;
+	label: string;
+	mark?: string;
+}
+
 interface Props {
 	title?: string;
 	description?: string;
 	frame?: 'home' | 'journal';
 	noindex?: boolean;
+	trail?: Crumb[];
 }
 
-const { title, description = site.description, frame = 'home', noindex = false } = Astro.props;
+const { title, description = site.description, frame = 'home', noindex = false, trail = [] } = Astro.props;
 const pageTitle = title ? `${title} — ${site.name}` : site.name;
 ---
 
@@ -42,7 +49,45 @@ const pageTitle = title ? `${title} — ${site.name}` : site.name;
 	<body>
 		<div class:list={[frame === 'journal' ? 'shell' : 'wrap']}>
 			<header class="site-header">
-				<a class="site-title" href="/">{site.name}</a>
+				{
+					trail.length > 0 ? (
+						<nav class="site-crumbs" aria-label="breadcrumb">
+							<a class="site-title" href="/">
+								{site.name}
+							</a>
+							{trail.map((crumb) => (
+								<>
+									<span class="site-crumbs-sep" aria-hidden="true">
+										/
+									</span>
+									{crumb.href ? (
+										<a class="site-crumb" href={crumb.href}>
+											{crumb.mark && (
+												<span class="home-mark" aria-hidden="true">
+													{crumb.mark}
+												</span>
+											)}
+											{crumb.label}
+										</a>
+									) : (
+										<span class="site-crumb" aria-current="page">
+											{crumb.mark && (
+												<span class="home-mark" aria-hidden="true">
+													{crumb.mark}
+												</span>
+											)}
+											{crumb.label}
+										</span>
+									)}
+								</>
+							))}
+						</nav>
+					) : (
+						<a class="site-title" href="/">
+							{site.name}
+						</a>
+					)
+				}
 				<button class="theme-toggle" type="button" data-theme-toggle>
 					dark
 				</button>

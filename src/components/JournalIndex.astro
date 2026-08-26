@@ -1,22 +1,14 @@
 ---
 interface Props {
-	mark: string;
-	journalTitle: string;
-	journalId: string;
 	posts: { id: string; title: string }[];
 }
 
-const { mark, journalTitle, journalId, posts } = Astro.props;
-const writeHref = `/admin/posts/new?journal=${encodeURIComponent(journalId)}`;
+const { posts } = Astro.props;
 ---
 
-<nav class="index" aria-label="Articles">
-	<p class="index-heading">
-		<span class="index-mark" aria-hidden="true">{mark}</span>
-		<span class="index-journal">{journalTitle}</span>
-	</p>
-	{
-		posts.length > 0 && (
+{
+	posts.length > 0 && (
+		<nav class="index" aria-label="Articles">
 			<ol class="index-list">
 				{posts.map((post) => (
 					<li>
@@ -26,12 +18,9 @@ const writeHref = `/admin/posts/new?journal=${encodeURIComponent(journalId)}`;
 					</li>
 				))}
 			</ol>
-		)
-	}
-	<p class="index-write">
-		<a href={writeHref}>write</a>
-	</p>
-</nav>
+		</nav>
+	)
+}
 
 <script>
 	const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')];

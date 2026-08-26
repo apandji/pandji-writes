@@ -3,7 +3,7 @@ import { render } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
 import JournalIndex from '../../../components/JournalIndex.astro';
 import Mermaid from '../../../components/Mermaid.astro';
-import EmptyInvite from '../../../components/EmptyInvite.astro';
+import EmptyPoem from '../../../components/EmptyPoem.astro';
 import { getJournals, getPostsByJournal } from '../../../lib/content';
 import { formatDate, journalMark } from '../../../lib/site';
 
@@ -25,35 +25,38 @@ const entries = await Promise.all(
 );
 const hasMermaid = posts.some((post) => /```mermaid/.test(post.body ?? ''));
 const mark = journalMark(journal.id, journal.data.emoji);
+const empty = entries.length === 0;
 ---
 
-<Layout title={journal.data.title} description={journal.data.description} frame="journal">
-	<JournalIndex
-		mark={mark}
-		journalTitle={journal.data.title}
-		journalId={journal.id}
-		posts={posts.map((post) => ({ id: post.id, title: post.data.title }))}
-	/>
-	<div class="feed">
-		{
-			entries.length === 0 ? (
-				<EmptyInvite journalId={journal.id} />
-			) : (
-				entries.map(({ post, Content }) => (
-					<article class="entry" id={post.id}>
-						<h1 class="post-title">{post.data.title}</h1>
-						<p class="post-date">
-							<time datetime={post.data.pubDate.toISOString()}>
-								{formatDate(post.data.pubDate)}
-							</time>
-						</p>
-						<div class="prose">
-							<Content />
-						</div>
-					</article>
-				))
-			)
-		}
-		{hasMermaid && <Mermaid />}
-	</div>
+<Layout
+	title={journal.data.title}
+	description={journal.data.description}
+	frame={empty ? 'home' : 'journal'}
+	trail={[{ label: journal.data.title, mark }]}
+>
+	{
+		empty ? (
+			<EmptyPoem />
+		) : (
+			<>
+				<JournalIndex posts={posts.map((post) => ({ id: post.id, title: post.data.title }))} />
+				<div class="feed">
+					{entries.map(({ post, Content }) => (
+						<article class="entry" id={post.id}>
+							<h1 class="post-title">{post.data.title}</h1>
+							<p class="post-date">
+								<time datetime={post.data.pubDate.toISOString()}>
+									{formatDate(post.data.pubDate)}
+								</time>
+							</p>
+							<div class="prose">
+								<Content />
+							</div>
+						</article>
+					))}
+					{hasMermaid && <Mermaid />}
+				</div>
+			</>
+		)
+	}
 </Layout>
