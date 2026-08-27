@@ -1,5 +1,5 @@
 ---
-title: class 1
+title: class 2
 pubDate: 2026-08-27
 journal: spatial-ai-apps
 draft: true
@@ -12,3 +12,14 @@ draft: true
 - Can be map analysis (YOLO), generated imagery or some other bespoke process
 - App must employ some ML/AI elements which may be prealculated or realtime content
 - App must be interactive - users can browse information, change views, or transform the underlying map
+
+
+
+**What is Geospatial Information?**
+Geospatial data identifies or describes locations, dimensions, borders, geometry and metadata related to physical environment, whether natural, artificial or conceptual.
+
+
+
+
+
+- QGIS - open source version of ARCGIS
