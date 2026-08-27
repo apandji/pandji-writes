@@ -1,5 +1,5 @@
 ---
-title: "spatial ai apps, 2026"
+title: "Spatial AI Apps, 2026"
 emoji: "⬡"
 order: 3
 ---
