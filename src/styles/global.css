@@ -480,12 +480,16 @@ body.is-admin::before {
 	min-width: 0;
 }
 
-.admin-flag {
-	font-style: italic;
-}
-
-.admin-post-meta + .admin-journal-write {
-	margin-left: 0.35rem;
+.admin-draft-pill {
+	flex: none;
+	align-self: center;
+	padding: 0.08rem 0.4rem;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--text) 8%, transparent);
+	color: var(--muted);
+	font-size: 0.75rem;
+	line-height: 1.35;
+	letter-spacing: 0.02em;
 }
 
 .admin-post-date {
