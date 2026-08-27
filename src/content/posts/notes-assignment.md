@@ -1,5 +1,5 @@
 ---
-title: notes - assignment
+title: class 1
 pubDate: 2026-08-27
 journal: spatial-ai-apps
 draft: true
