@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 export type AdminCrumb = {
@@ -26,6 +27,7 @@ const pageTitle = title ?? 'admin';
 		<meta name="generator" content={Astro.generator} />
 		<meta name="robots" content="noindex" />
 		<title>{pageTitle}</title>
+		<ClientRouter />
 		<Font cssVariable="--font-sans" preload />
 		<Font cssVariable="--font-mono" />
 		<script is:inline>

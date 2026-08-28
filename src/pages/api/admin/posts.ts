@@ -9,7 +9,19 @@ const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_BYTES = 1_000_000;
 const MAX_FILES = 4;
 
-function fail(journal: string, slug: string, error: string) {
+function wantsJson(request: Request) {
+	return request.headers.get('Accept')?.includes('application/json') ?? false;
+}
+
+function json(body: Record<string, unknown>, status = 200) {
+	return new Response(JSON.stringify(body), {
+		status,
+		headers: { 'Content-Type': 'application/json' },
+	});
+}
+
+function fail(journal: string, slug: string, error: string, asJson: boolean) {
+	if (asJson) return json({ ok: false, error }, 400);
 	const params = new URLSearchParams({ error });
 	if (journal) params.set('journal', journal);
 	if (slug) params.set('slug', slug);
@@ -20,6 +32,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 	if (!isSameOrigin(request)) {
 		return new Response('forbidden', { status: 403 });
 	}
+
+	const asJson = wantsJson(request);
 
 	try {
 		const data = await request.formData();
@@ -33,20 +47,24 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 		const images = data.getAll('images').filter((value): value is File => value instanceof File && value.size > 0);
 
 		if (!title || !journal || !pubDate) {
-			return redirect(fail(journal, slugInput, 'missing'));
+			const target = fail(journal, slugInput, 'missing', asJson);
+			return typeof target === 'string' ? redirect(target) : target;
 		}
 
 		if (!/^\d{4}-\d{2}-\d{2}$/.test(pubDate)) {
-			return redirect(fail(journal, slugInput, 'date'));
+			const target = fail(journal, slugInput, 'date', asJson);
+			return typeof target === 'string' ? redirect(target) : target;
 		}
 
 		const journals = await listJournalsFromRepo();
 		if (!journals.some((item) => item.id === journal)) {
-			return redirect(fail(journal, slugInput, 'journal'));
+			const target = fail(journal, slugInput, 'journal', asJson);
+			return typeof target === 'string' ? redirect(target) : target;
 		}
 
 		if (images.length > MAX_FILES) {
-			return redirect(fail(journal, slugInput, 'images'));
+			const target = fail(journal, slugInput, 'images', asJson);
+			return typeof target === 'string' ? redirect(target) : target;
 		}
 
 		let previous = null;
@@ -69,7 +87,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
 		for (const image of images) {
 			if (!ALLOWED.has(image.type) || image.size > MAX_BYTES) {
-				return redirect(fail(journal, slugInput, 'images'));
+				const target = fail(journal, slugInput, 'images', asJson);
+				return typeof target === 'string' ? redirect(target) : target;
 			}
 
 			let name = safeFilename(image.name);
@@ -119,6 +138,17 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
 		const clearKey = editing ? `post-draft:${slug}` : 'post-draft:new';
 
+		if (asJson) {
+			return json({
+				ok: true,
+				slug,
+				journal,
+				isDraft,
+				clearKey,
+				liveHref: isDraft ? undefined : `/journals/${journal}/${slug}`,
+			});
+		}
+
 		if (isDraft) {
 			return redirect(
 				`/admin/journals/${encodeURIComponent(journal)}?saved=draft&clear=${encodeURIComponent(clearKey)}`,
@@ -130,6 +160,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 		);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'save failed';
-		return redirect(fail('', '', message));
+		if (asJson) return json({ ok: false, error: message }, 500);
+		return redirect(fail('', '', message, false) as string);
 	}
 };
