@@ -91,15 +91,125 @@ function toBase64(content: string | Uint8Array) {
 	return Buffer.from(bytes).toString('base64');
 }
 
-export async function getRepoFile(path: string): Promise<string | null> {
+function isTextPayload(files: GithubFile[]) {
+	return files.every((file) => typeof file.content === 'string');
+}
+
+async function getRepoFileMeta(path: string): Promise<{ content: string; sha: string } | null> {
 	try {
 		const file = await github(`/contents/${path}?ref=${encodeURIComponent(config().branch)}`);
-		if (!file?.content || typeof file.content !== 'string') return null;
-		return Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8');
+		if (!file?.content || typeof file.content !== 'string' || typeof file.sha !== 'string') return null;
+		return {
+			content: Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8'),
+			sha: file.sha,
+		};
 	} catch (error) {
 		if (error instanceof Error && error.message.includes('404')) return null;
 		throw error;
 	}
+}
+
+async function putRepoFile(path: string, content: string, message: string, sha?: string) {
+	const { branch } = config();
+	const body: Record<string, string> = {
+		message,
+		content: toBase64(content),
+		branch,
+	};
+	if (sha) body.sha = sha;
+	await github(`/contents/${path}`, {
+		method: 'PUT',
+		body: JSON.stringify(body),
+	});
+}
+
+async function putRepoFileWithRetry(path: string, content: string, message: string, sha?: string) {
+	try {
+		await putRepoFile(path, content, message, sha);
+	} catch (error) {
+		if (!(error instanceof Error) || !error.message.includes('409')) throw error;
+		const fresh = await getRepoFileMeta(path);
+		await putRepoFile(path, content, message, fresh?.sha);
+	}
+}
+
+/** One file per commit, but far fewer round-trips than the git object API. */
+async function commitViaContentsAPI(
+	files: { path: string; content: string }[],
+	message: string,
+	knownShas = new Map<string, string>(),
+) {
+	const metas = await Promise.all(
+		files.map(async (file) => {
+			if (knownShas.has(file.path)) {
+				return { path: file.path, sha: knownShas.get(file.path) };
+			}
+			const meta = await getRepoFileMeta(file.path);
+			return { path: file.path, sha: meta?.sha };
+		}),
+	);
+
+	for (const [index, file] of files.entries()) {
+		const commitMessage = index === 0 ? message : `Update ${file.path.split('/').pop()}`;
+		await putRepoFileWithRetry(file.path, file.content, commitMessage, metas[index]?.sha);
+	}
+
+	invalidateAdminCache(['journals', 'posts', 'post:*']);
+}
+
+async function commitViaGitAPI(files: GithubFile[], message: string) {
+	const { branch } = config();
+	const ref = await github(`/git/ref/heads/${branch}`);
+	const commitSha = ref.object.sha as string;
+	const commit = await github(`/git/commits/${commitSha}`);
+	const baseTree = commit.tree.sha as string;
+
+	const treeItems = await Promise.all(
+		files.map(async (file) => {
+			const blob = await github('/git/blobs', {
+				method: 'POST',
+				body: JSON.stringify({
+					content: toBase64(file.content),
+					encoding: 'base64',
+				}),
+			});
+			return {
+				path: file.path,
+				mode: '100644' as const,
+				type: 'blob' as const,
+				sha: blob.sha as string,
+			};
+		}),
+	);
+
+	const tree = await github('/git/trees', {
+		method: 'POST',
+		body: JSON.stringify({
+			base_tree: baseTree,
+			tree: treeItems,
+		}),
+	});
+
+	const next = await github('/git/commits', {
+		method: 'POST',
+		body: JSON.stringify({
+			message,
+			tree: tree.sha,
+			parents: [commitSha],
+		}),
+	});
+
+	await github(`/git/refs/heads/${branch}`, {
+		method: 'PATCH',
+		body: JSON.stringify({ sha: next.sha }),
+	});
+
+	invalidateAdminCache(['journals', 'posts', 'post:*']);
+}
+
+export async function getRepoFile(path: string): Promise<string | null> {
+	const meta = await getRepoFileMeta(path);
+	return meta?.content ?? null;
 }
 
 export async function readHistory(): Promise<HistoryEntry[]> {
@@ -126,61 +236,27 @@ export async function readHistory(): Promise<HistoryEntry[]> {
 
 export async function commitFiles(files: GithubFile[], message: string, historySummary?: string) {
 	const payload = [...files];
+	const knownShas = new Map<string, string>();
+
 	if (historySummary?.trim()) {
-		const existing = (await getRepoFile(HISTORY_PATH)) ?? '';
+		const historyMeta = await getRepoFileMeta(HISTORY_PATH);
+		if (historyMeta) knownShas.set(HISTORY_PATH, historyMeta.sha);
 		payload.push({
 			path: HISTORY_PATH,
-			content: historyLine(historySummary.trim()) + existing,
+			content: historyLine(historySummary.trim()) + (historyMeta?.content ?? ''),
 		});
 	}
 
-	const { branch } = config();
-	const ref = await github(`/git/ref/heads/${branch}`);
-	const commitSha = ref.object.sha as string;
-	const commit = await github(`/git/commits/${commitSha}`);
-	const baseTree = commit.tree.sha as string;
-
-	const treeItems = await Promise.all(
-		payload.map(async (file) => {
-			const blob = await github('/git/blobs', {
-				method: 'POST',
-				body: JSON.stringify({
-					content: toBase64(file.content),
-					encoding: 'base64',
-				}),
-			});
-			return {
-				path: file.path,
-				mode: '100644' as const,
-				type: 'blob' as const,
-				sha: blob.sha as string,
-			};
-		}),
-	);
-
-	invalidateAdminCache(['journals', 'posts', 'post:*']);
-
-	const tree = await github('/git/trees', {
-		method: 'POST',
-		body: JSON.stringify({
-			base_tree: baseTree,
-			tree: treeItems,
-		}),
-	});
-
-	const next = await github('/git/commits', {
-		method: 'POST',
-		body: JSON.stringify({
+	if (isTextPayload(payload)) {
+		await commitViaContentsAPI(
+			payload.map((file) => ({ path: file.path, content: file.content as string })),
 			message,
-			tree: tree.sha,
-			parents: [commitSha],
-		}),
-	});
+			knownShas,
+		);
+		return;
+	}
 
-	await github(`/git/refs/heads/${branch}`, {
-		method: 'PATCH',
-		body: JSON.stringify({ sha: next.sha }),
-	});
+	await commitViaGitAPI(payload, message);
 }
 
 export async function listJournalsFromRepo(): Promise<GithubJournal[]> {
