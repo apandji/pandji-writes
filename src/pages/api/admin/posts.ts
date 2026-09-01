@@ -9,6 +9,17 @@ const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_BYTES = 1_000_000;
 const MAX_FILES = 4;
 
+function escapeRegex(value: string) {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Rewrite any markdown image path ending in filename to the committed upload path. */
+function rewriteImagePath(body: string, filename: string, to: string) {
+	if (!filename) return body;
+	const escaped = escapeRegex(filename);
+	return body.replace(new RegExp(`\\]\\(/uploads/[^)\\s]+/${escaped}\\)`, 'g'), `](${to})`);
+}
+
 function fail(journal: string, slug: string, error: string) {
 	const params = new URLSearchParams({ error });
 	if (journal) params.set('journal', journal);
@@ -81,10 +92,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 			const uploadPath = `public/uploads/${slug}/${name}`;
 			const bytes = new Uint8Array(await image.arrayBuffer());
 			files.push({ path: uploadPath, content: bytes });
-			const from = `/uploads/${slugify(title)}/${image.name}`;
 			const to = `/uploads/${slug}/${name}`;
-			body = body.split(from).join(to);
-			body = body.split(`](/uploads/${slug}/${image.name})`).join(`](${to})`);
+			body = rewriteImagePath(body, image.name, to);
+			if (name !== image.name) {
+				body = rewriteImagePath(body, name, to);
+			}
 		}
 
 		files.unshift({
