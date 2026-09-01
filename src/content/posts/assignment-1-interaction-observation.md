@@ -24,3 +24,9 @@ If I were to redesign this, I would explore ways for more ways for the user to i
 
 ## My takeaway
 I think my biggest takeaway from this exercise is to really think through why certain systems use certain inputs (for ex. the Tesla centering the phone) **Is the easiest thing to use as the trigger, the best? **
+
+## Weekly Reflections
+Exploring the sensor-action when it came to the more speculative, out-there ideas really expanded my thinking about what is possible. Something that I have been thinking about is how to be more hardware-centered and less so software-centered -- or at least redefining what software means. There does not need to be a visual UI, or an HTML file, or a React app, or something like that to power an interaction design project. Excited to learn more about this.
+
+## Lab Reflections
+I have learned a lot of this stuff in highschool, so reviewing this. One thing that I really took away is the metaphor of electricity as water flowing through a pipe with esistors functioning as gateways to reduce flow. What I remembered of electronics from high school physics is a lot of calculations (ohms and whatnot) -- but I am looking forward to digging into the design of circuitry as a means to achieve different design objectives.
