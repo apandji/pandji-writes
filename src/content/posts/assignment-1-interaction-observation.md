@@ -2,7 +2,6 @@
 title: assignment 1 - interaction observation
 pubDate: 2026-09-01
 journal: physical-computing
-draft: true
 ---
 
 # Interaction Observation
@@ -15,4 +14,9 @@ If I were to redesign this, I would explore ways to sense the specific person. G
 
 ## Simple Sensors project
 
-The system senses
+The system senses people walking by using mmWave technology. This is an alternative to CCTV based sensing, that protects privacy. The project itself makes transparent what is being tracked, where that data is sent and why it is doing that. The participant just goes about their day. The system responds by sensing and then changing its data module to show that the person was tracked. This is designed for a civic purpose. This interaction is unexpected in that it centers user privacy and transparency. 
+
+If I were to redesign this, I would explore ways for more ways for the user to interact with it so that they can keep the results of that interaction. 
+
+## My takeaway
+I think my biggest takeaway from this exercise is to really think through why certain systems use certain inputs (for ex. the Tesla centering the phone) **Is the easiest thing to use as the trigger, the best? **
