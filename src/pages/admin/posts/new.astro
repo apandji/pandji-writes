@@ -7,20 +7,24 @@ import PublishDing from '../../../components/PublishDing.astro';
 import Button from '../../../components/Button.astro';
 import { getPostForAdmin, listJournalsForAdmin } from '../../../lib/github';
 
+const slug = Astro.url.searchParams.get('slug') ?? '';
+const selectedJournal = Astro.url.searchParams.get('journal') ?? '';
+const resume = Astro.url.searchParams.get('resume') === '1';
+
 let journals: { id: string; title: string }[] = [];
+let existing: Awaited<ReturnType<typeof getPostForAdmin>> = null;
 let loadError = '';
 
 try {
-	journals = await listJournalsForAdmin();
+	[journals, existing] = await Promise.all([
+		listJournalsForAdmin(),
+		slug ? getPostForAdmin(slug) : Promise.resolve(null),
+	]);
 } catch (error) {
 	loadError = error instanceof Error ? error.message : 'could not read journals.';
 }
 
 const today = new Date().toISOString().slice(0, 10);
-const selectedJournal = Astro.url.searchParams.get('journal') ?? '';
-const slug = Astro.url.searchParams.get('slug') ?? '';
-const resume = Astro.url.searchParams.get('resume') === '1';
-const existing = slug ? await getPostForAdmin(slug) : null;
 const error = Astro.url.searchParams.get('error');
 const errorText =
 	error === 'missing'
