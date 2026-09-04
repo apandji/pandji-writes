@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets';
+import { site } from '../lib/site';
 import '../styles/global.css';
 
 export type AdminCrumb = {
@@ -13,6 +14,10 @@ interface Props {
 	crumbs?: AdminCrumb[];
 }
 
+<<<<<<< HEAD
+const adminName = site.adminName;
+=======
+>>>>>>> origin/main
 const { title, wide = false, crumbs = [] } = Astro.props;
 const pageTitle = title ?? 'admin';
 ---
