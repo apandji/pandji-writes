@@ -1,6 +1,6 @@
 ---
-title: spatial ai apps
+title: "Spatial AI Apps, 2026"
 emoji: "⬡"
-order: 4
+order: 3
 ---
 

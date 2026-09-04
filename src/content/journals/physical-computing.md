@@ -1,5 +1,6 @@
 ---
-title: Physical Computing
-order: 1
+title: "Physical Computing, 2026"
+emoji: "✧"
+order: 2
 ---
 

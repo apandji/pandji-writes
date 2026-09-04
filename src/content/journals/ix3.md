@@ -1,6 +1,6 @@
 ---
-title: ix3
+title: "ix3, 2026"
 emoji: "⬡"
-order: 5
+order: 4
 ---
 
