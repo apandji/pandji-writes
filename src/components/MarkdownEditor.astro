@@ -2,12 +2,13 @@
 interface Props {
 	draftKey?: string;
 	value?: string;
+	uploadSlug?: string;
 }
 
-const { draftKey = 'post-draft', value = '' } = Astro.props;
+const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 ---
 
-<div class="md-editor" data-md-editor data-draft-key={draftKey}>
+<div class="md-editor" data-md-editor data-draft-key={draftKey} data-upload-slug={uploadSlug}>
 	<div class="md-toolbar" role="toolbar" aria-label="formatting">
 		<div class="md-group" role="group" aria-label="headings">
 			<button type="button" data-md="h1" title="Heading 1">H1</button>
@@ -102,6 +103,7 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 	let draftKey = editor instanceof HTMLElement ? editor.dataset.draftKey || 'post-draft:new' : 'post-draft:new';
 	const resume = form?.dataset.resume === '1';
 	const preferJournal = form?.dataset.preferJournal ?? '';
+	const initialUploadSlug = editor instanceof HTMLElement ? editor.dataset.uploadSlug || '' : '';
 
 	if (
 		editor instanceof HTMLElement &&
@@ -141,14 +143,23 @@ const { draftKey = 'post-draft', value = '' } = Astro.props;
 
 		marked.setOptions({ gfm: true, breaks: false });
 
-		function slugCandidate() {
-			return (
+		function uploadSlug() {
+			const hidden = form?.querySelector<HTMLInputElement>('input[name="slug"]');
+			if (hidden?.value) return hidden.value;
+			if (initialUploadSlug) return initialUploadSlug;
+			const fromTitle =
 				title?.value
 					.toLowerCase()
+					.normalize('NFKD')
+					.replace(/[\u0300-\u036f]/g, '')
 					.replace(/[^a-z0-9]+/g, '-')
 					.replace(/^-+|-+$/g, '')
-					.slice(0, 40) || 'post'
-			);
+					.slice(0, 80) ?? '';
+			return fromTitle || 'post';
+		}
+
+		function slugCandidate() {
+			return uploadSlug();
 		}
 
 		function wordCount(text: string) {
