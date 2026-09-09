@@ -62,7 +62,7 @@ As I water it, the garden will grow. There will be a public facing part of it, a
 
 ## examples:
 * oh-hi.info - interesting interaction to scroll and then show content
-* chia.design - 
+* chia.design - COLOR!
 * ⭐️ https://dantaeyoung.com - I love the way the copy is written, and the changing dynamic background gradient
 * simone.computer - the url is so good, I like the CRT<>LED mode
 * trpchai.net - grid of stuff that expands as you hover over it; how is this done? Js?
