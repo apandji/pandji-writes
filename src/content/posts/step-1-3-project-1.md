@@ -2,7 +2,6 @@
 title: "step 1 - 3, project 1"
 pubDate: 2026-09-09
 journal: programming-usable-interfaces
-draft: true
 ---
 
 # 20 possible projects
