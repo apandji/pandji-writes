@@ -8,9 +8,6 @@ journal: programming-usable-interfaces
 
 I was working on what I imagine would be my portfolio website. I used Cursor, which had autocomplete, which was nice. But, I was fully disconnected from wifi, and coding by hand. I haven't done this in a while. What I ended up playing around with the most if flexboxes. I resonated with the idea of designing in harmony with the grain of the web's materiality, as when I have worked on web projects prior I would force my vision onto the material and have to make an iPhone version, an iPad version - a full screen one - across multiple viewports. 
 
-![image.png](/uploads/web-dev-experiments/image-1.png)
-![image.png](/uploads/web-dev-experiments/image-1.png)
-
 # experiment two - with my buddy ai
 
 Next I used AI to teach me concepts. I asked it for an advanced lesson, and it ended up going into an advanced lesson on typography. What I did was...
@@ -20,13 +17,6 @@ Next I used AI to teach me concepts. I asked it for an advanced lesson, and it e
 
 My portfolio feels a bit better.
 
-![image.png](/uploads/web-dev-experiments/image-1.png)
-![image.png](/uploads/web-dev-experiments/image-1.png)
-![image.png](/uploads/web-dev-experiments/image-1.png)
-
 # experiment three - npm
 
 For my self directed experiment, I used my buddy AI to teach me about npm. I have used this in the past but never really did commands manually. Things that I learned from this experiment - for the Geist font I used nom like a delivery truck. It loaded in the font files, I moved it to its own folder. This means that I can delete all the extra files which I did through 'rpm uninstall'. I also learned how to see all the things I brought in from the delivery truck by using `nom ls`. I ran out of time but there's more to learn. One thing though here, is my AI definitely hallucinated, and thought there was no /fonts folder. I got mad at it.
-
-![image.png](/uploads/web-dev-experiments/image-1.png)
-![image.png](/uploads/web-dev-experiments/image-1.png)
