@@ -2,7 +2,6 @@
 title: web dev experiments
 pubDate: 2026-09-14
 journal: programming-usable-interfaces
-draft: true
 ---
 
 # experiment one - coding on a plane, with white noise
