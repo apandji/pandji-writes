@@ -7,7 +7,7 @@ journal: physical-computing
 # Touch Sensors
 This week we explored different touch sensors, and how we might design and develop different interactions with them. We looked at three ways in which touch can be used as an input: basic, force sensitive and flex. We learned that these touch sensors take in analog values, which in order for us to be able to work with in the Arduino we have to map to digital values. Then we can code the logic on the Arduino platform to create different interactive experiences.
 
-![image.png](/uploads/assignment-2/image.png)
+(See [Slide 3](https://www.figma.com/slides/FXDimFjND2C7mx6pYaF31b) for our explorations of the different touch sensors]
 
 For Assignment 2, we explored ways in which touch can be used as an input to create sound. For our output we used a piezo buzzer (though we were thinking that this can be extended to using actually speakers next time). 
 
@@ -24,6 +24,4 @@ Here we now used the flex sensor. What we discovered here was that the flex sens
 We looked at two existing applications of touch interaction. The first is a** touch sensitive painting **where paint is the sensor. The electric paint works as the sensor and when users touch a part of the image they get a sound. The other application is a more commercial application, which is the **Native Instruments Maschine.**  It is a MIDI controller, with various capacitive and also mechanical controls. 
 
 ## New Interaction Ideas and Reflections
-The initial idea that 
-
-Short Reflection
+As we think about our experiments we left with a few questions: How can we get more variation in the values we get here? How can the Arduino be programmed to map analog values to a wider range of digital values? Can we use a better output device (speaker instead of buzzer) to achieve different tonal effects?
