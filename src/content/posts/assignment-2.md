@@ -2,7 +2,6 @@
 title: assignment 2
 pubDate: 2026-09-15
 journal: physical-computing
-draft: true
 ---
 
 # Touch Sensors
