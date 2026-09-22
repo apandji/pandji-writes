@@ -2,7 +2,6 @@
 title: assignment 3
 pubDate: 2026-09-22
 journal: physical-computing
-draft: true
 ---
 
 # Assignment
