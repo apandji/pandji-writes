@@ -820,6 +820,20 @@ body.is-admin::before {
 	font-style: italic;
 }
 
+[data-md-save-note] {
+	color: var(--text);
+	font-style: normal;
+}
+
+.md-editor.is-saving .md-body,
+.md-editor.is-saving .md-toolbar {
+	opacity: 0.92;
+}
+
+.md-editor.is-saving [data-md-save-note] {
+	font-style: italic;
+}
+
 .md-slash {
 	position: absolute;
 	left: 1rem;

@@ -63,6 +63,7 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 		<span data-md-count>0 words</span>
 		<span class="md-status-hint">/ blocks · ⌘/Ctrl+Enter draft · ⌘/Ctrl+Shift+Enter publish · drafts auto-saved here</span>
 		<span data-md-draft-note hidden>draft restored</span>
+		<span data-md-save-note hidden></span>
 	</div>
 </div>
 
@@ -89,6 +90,7 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 	const input = editor?.querySelector<HTMLInputElement>('[data-md-images]');
 	const countEl = editor?.querySelector<HTMLElement>('[data-md-count]');
 	const draftNote = editor?.querySelector<HTMLElement>('[data-md-draft-note]');
+	const saveNote = editor?.querySelector<HTMLElement>('[data-md-save-note]');
 	const slashMenu = editor?.querySelector<HTMLUListElement>('[data-md-slash]');
 	const linkPop = editor?.querySelector<HTMLElement>('[data-md-link]');
 	const linkUrl = editor?.querySelector<HTMLInputElement>('[data-md-link-url]');
@@ -98,7 +100,7 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 	const title = form?.querySelector<HTMLInputElement>('input[name="title"]');
 	const journal = form?.querySelector<HTMLSelectElement>('select[name="journal"]');
 	const pubDate = form?.querySelector<HTMLInputElement>('input[name="pubDate"]');
-	const draftKey = editor instanceof HTMLElement ? editor.dataset.draftKey || 'post-draft:new' : 'post-draft:new';
+	let draftKey = editor instanceof HTMLElement ? editor.dataset.draftKey || 'post-draft:new' : 'post-draft:new';
 	const resume = form?.dataset.resume === '1';
 	const preferJournal = form?.dataset.preferJournal ?? '';
 	const initialUploadSlug = editor instanceof HTMLElement ? editor.dataset.uploadSlug || '' : '';
@@ -130,6 +132,10 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 		let pendingCaret: { start: number; end: number } | null = null;
 		let linkRange: { start: number; end: number } | null = null;
 		let draftTimer = 0;
+		let previewTimer = 0;
+		let saveNoteTimer = 0;
+		let saving = false;
+		let lastLocalNote = 0;
 		let slashOpen = false;
 		let slashIndex = 0;
 		let slashQuery = '';
@@ -167,6 +173,21 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 			countEl.textContent = `${n} word${n === 1 ? '' : 's'}`;
 		}
 
+		function showSaveNote(text: string, ms = 2500, throttle = false) {
+			if (!saveNote) return;
+			if (throttle) {
+				const now = Date.now();
+				if (now - lastLocalNote < 3000) return;
+				lastLocalNote = now;
+			}
+			saveNote.textContent = text;
+			saveNote.hidden = false;
+			window.clearTimeout(saveNoteTimer);
+			saveNoteTimer = window.setTimeout(() => {
+				if (saveNote) saveNote.hidden = true;
+			}, ms);
+		}
+
 		function saveDraft() {
 			try {
 				localStorage.setItem(
@@ -179,6 +200,7 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 						savedAt: Date.now(),
 					}),
 				);
+				showSaveNote('saved locally', 1500, true);
 			} catch {
 				/* ignore quota */
 			}
@@ -225,6 +247,11 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 			} catch {
 				/* ignore */
 			}
+		}
+
+		function schedulePreview() {
+			window.clearTimeout(previewTimer);
+			previewTimer = window.setTimeout(syncPreview, 120);
 		}
 
 		function syncPreview() {
@@ -376,11 +403,7 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 		}
 
 		function submitIntent(intentValue: 'draft' | 'publish') {
-			const intent = form?.querySelector<HTMLInputElement>('[data-intent]');
-			if (intent) intent.value = intentValue;
-			if (intentValue === 'publish') window.playPublishDing?.();
-			saveDraft();
-			form?.requestSubmit();
+			void saveToRepo(intentValue);
 		}
 
 		function insertDiagram() {
@@ -658,7 +681,7 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 		field.addEventListener('input', () => {
 			updateCount();
 			scheduleDraft();
-			syncPreview();
+			schedulePreview();
 			maybeUpdateSlash();
 		});
 
@@ -718,21 +741,126 @@ const { draftKey = 'post-draft', value = '', uploadSlug = '' } = Astro.props;
 			const intent = form.querySelector<HTMLInputElement>('[data-intent]');
 			if (button && intent) {
 				intent.value = button.dataset.setIntent ?? 'draft';
-				if (intent.value === 'publish') window.playPublishDing?.();
 			}
 		});
 
+		function setSaving(on: boolean) {
+			saving = on;
+			surface.classList.toggle('is-saving', on);
+			if (!form) return;
+			for (const button of form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')) {
+				button.disabled = on;
+			}
+		}
+
+		function ensureSlugInput(slug: string) {
+			if (!form) return;
+			let input = form.querySelector<HTMLInputElement>('input[name="slug"]');
+			if (!input) {
+				input = document.createElement('input');
+				input.type = 'hidden';
+				input.name = 'slug';
+				form.prepend(input);
+			}
+			input.value = slug;
+		}
+
+		function clearSavedDrafts(keys: string[]) {
+			for (const key of keys) {
+				try {
+					localStorage.removeItem(key);
+				} catch {
+					/* ignore */
+				}
+			}
+		}
+
+		function showPublishNote(liveHref: string, journalHref: string) {
+			const existing = form?.querySelector('[data-save-banner]');
+			existing?.remove();
+			if (!form) return;
+			const banner = document.createElement('div');
+			banner.className = 'publish-ritual';
+			banner.dataset.saveBanner = '';
+			banner.innerHTML = `<p class="publish-ritual-line">it is written, this is the way.</p>
+				<p class="publish-ritual-links">
+					<a href="${liveHref}">open it</a>
+					<span aria-hidden="true">·</span>
+					<a href="${journalHref}">journal</a>
+					<span aria-hidden="true">·</span>
+					<span class="publish-ritual-soft">the site will catch up</span>
+				</p>`;
+			form.prepend(banner);
+		}
+
+		async function saveToRepo(intentValue: 'draft' | 'publish') {
+			if (!form || saving) return;
+			const intent = form.querySelector<HTMLInputElement>('[data-intent]');
+			if (intent) intent.value = intentValue;
+			if (intentValue === 'publish') window.playPublishDing?.();
+			saveDraft();
+
+			setSaving(true);
+			showSaveNote(intentValue === 'publish' ? 'publishing…' : 'saving…', 120_000);
+
+			try {
+				const response = await fetch(form.action, {
+					method: 'POST',
+					body: new FormData(form),
+					headers: { Accept: 'application/json' },
+					credentials: 'same-origin',
+				});
+				const payload = (await response.json()) as {
+					ok: boolean;
+					error?: string;
+					slug?: string;
+					journal?: string;
+					isDraft?: boolean;
+					clearKey?: string;
+					liveHref?: string;
+				};
+
+				if (!response.ok || !payload.ok) {
+					throw new Error(payload.error ?? 'save failed');
+				}
+
+				if (payload.slug) ensureSlugInput(payload.slug);
+				if (payload.clearKey) {
+					clearSavedDrafts([payload.clearKey, 'post-draft:new', 'post-draft']);
+				}
+
+				if (payload.isDraft) {
+					showSaveNote('draft saved');
+				} else {
+					showSaveNote('published');
+					if (payload.liveHref && payload.journal) {
+						showPublishNote(payload.liveHref, `/admin/journals/${encodeURIComponent(payload.journal)}`);
+					}
+				}
+
+				const nextKey = payload.slug ? `post-draft:${payload.slug}` : draftKey;
+				if (nextKey !== draftKey) {
+					draftKey = nextKey;
+					if (editor instanceof HTMLElement) editor.dataset.draftKey = nextKey;
+				}
+			} catch (error) {
+				const message = error instanceof Error ? error.message : 'save failed';
+				showSaveNote(message, 4000);
+			} finally {
+				setSaving(false);
+			}
+		}
+
 		form?.addEventListener('submit', (event) => {
+			event.preventDefault();
 			if (!form) return;
 			const intent = form.querySelector<HTMLInputElement>('[data-intent]');
 			const submitter = event.submitter;
 			if (intent && submitter instanceof HTMLButtonElement && submitter.dataset.setIntent) {
 				intent.value = submitter.dataset.setIntent;
 			}
-			saveDraft();
-			for (const button of form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')) {
-				button.disabled = true;
-			}
+			const intentValue = intent?.value === 'publish' ? 'publish' : 'draft';
+			void saveToRepo(intentValue);
 		});
 
 		if (preferJournal && journal) journal.value = preferJournal;
