@@ -37,10 +37,23 @@ export function isJournalMark(value: string) {
 	return (journalMarks as readonly string[]).includes(value);
 }
 
+function env(name: string, fallback = '') {
+	const value = (import.meta.env[name] || process.env[name] || '').trim();
+	return value || fallback;
+}
+
+/** Short name only — e.g. `pandji` → public identity `pandji writes.` */
+const shortName = env('SITE_NAME', 'pandji');
+
 export const site = {
-	name: 'pandji writes.',
-	author: 'Pandji',
-	description: 'Journals on programming usable interfaces and physical computing.',
+	shortName,
+	name: `${shortName} writes.`,
+	adminName: `${shortName} admins.`,
+	author: env('SITE_AUTHOR', 'Pandji'),
+	description: env(
+		'SITE_DESCRIPTION',
+		'Journals on programming usable interfaces and physical computing.',
+	),
 };
 
 export function journalMark(id: string, override?: string) {
