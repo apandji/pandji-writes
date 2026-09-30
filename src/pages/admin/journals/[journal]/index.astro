@@ -12,14 +12,14 @@ const saved = Astro.url.searchParams.get('saved');
 const publishedSlug = Astro.url.searchParams.get('slug') ?? '';
 const clearDraftKey = Astro.url.searchParams.get('clear') ?? '';
 
-const journals = await listJournalsForAdmin();
+const [journals, allPosts] = await Promise.all([listJournalsForAdmin(), listPostsForAdmin()]);
 const journal = journals.find((item) => item.id === journalId);
 
 if (!journal) {
 	return Astro.redirect('/admin');
 }
 
-const posts = (await listPostsForAdmin()).filter((post) => post.journal === journal.id);
+const posts = allPosts.filter((post) => post.journal === journal.id);
 const mark = journalMark(journal.id, journal.emoji);
 const liveHref = publishedSlug ? `/journals/${journal.id}/${publishedSlug}` : `/journals/${journal.id}`;
 const writeHref = `/admin/posts/new?journal=${encodeURIComponent(journal.id)}`;
